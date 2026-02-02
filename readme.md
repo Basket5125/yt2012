@@ -3,7 +3,9 @@ a fairly accurate 2012 youtube frontend based on yt2009.
 
 <img src="doc-imgs/homepage1.jpg" width="400">
 <img src="doc-imgs/watch1.jpg" width="400">
+
 ## WARNING This is in really early development ony few functions work correctly and only fully supported languages are English and Polish
+
 ---
 
 ## setup
