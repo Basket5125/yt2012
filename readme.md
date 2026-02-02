@@ -5,9 +5,6 @@ a fairly accurate 2012 youtube frontend based on yt2009.
 <img src="doc-imgs/watch1.jpg" width="400">
 
 ## WARNING This is in really early development ony few functions work correctly and only fully supported languages are English and Polish
-
----
-
 ## setup
 ### if you prefer using docker rather than installing directly, go [here](docker.md) for setup instructions instead
 ### if hosting on windows xp, follow [xp specific instructions](windowsxp.md) instead.
