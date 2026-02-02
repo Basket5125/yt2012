@@ -682,17 +682,17 @@ module.exports = {
                 "page=" + currentPage,
                 "page=" + (currentPage - 1)
             )
-            pagingHTML += `<a href="${previous}" class="pagerNotCurrent">Previous</a>`
+            pagingHTML += `<a href="${previous}" class="yt-uix-button yt-uix-pager-previous yt-uix-pager-button yt-uix-button-default" ><span class="yt-uix-button-content">« Previous</span></a>&nbsp;`
         }
         // create paging buttons if they fit within
         // estResults / 20 (estimated max page count)
         pageNumbers.forEach(page => {
             if(estResults / 20 >= page * 20 || !estResults) {
                 if(page == currentPage) {
-                    pagingHTML += `<span class="pagerCurrent">${currentPage}</span>`
+                    pagingHTML += `<a href="#" class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-toggled yt-uix-button-default" data-page="${currentPage}" aria-label="Go to page ${currentPage}"><span class="yt-uix-button-content">${currentPage}</span></a>&nbsp;`
                 } else {
                     let pageLink = url.replace("page=" + currentPage, "page=" + page)
-                    pagingHTML += `<a href="${pageLink}" class="pagerNotCurrent">${page}</a>`
+                    pagingHTML += `<a href="${pageLink}" class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-default" data-page="${page}" aria-label="Go to page ${page}"><span class="yt-uix-button-content">${page}</span></a>&nbsp;`
                 }
             }
         })
@@ -702,7 +702,7 @@ module.exports = {
                 "page=" + currentPage,
                 "page=" + (currentPage + 1)
             )
-            pagingHTML += `...<a href="${next}" class="pagerNotCurrent">Next</a>`
+            pagingHTML += `<a href="${next}" class="yt-uix-button yt-uix-pager-previous yt-uix-pager-button yt-uix-button-default" ><span class="yt-uix-button-content">Next »</span></a>&nbsp;`
         }
 
         code = code.replace(
