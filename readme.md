@@ -3,16 +3,7 @@ a fairly accurate 2012 youtube frontend based on yt2009.
 
 <img src="doc-imgs/homepage1.jpg" width="400">
 <img src="doc-imgs/watch1.jpg" width="400">
-
----
-
-## thank you to yt2009's top tier monthly sponsors!
-
-- [RF7391](https://github.com/RF7391)
-- [Szprinktrap](https://github.com/Szprinktrap)
-
-for $5/month, you can also join this list! --> https://github.com/sponsors/ftde0
-
+## WARNING This is in really early development ony few functions work correctly and only fully supported languages are English and Polish
 ---
 
 ## setup
@@ -81,14 +72,9 @@ navigate to **/flags** to change settings locally. here, for example, you can se
 
 feel free to nav to **/toggle_f** to enable flash player support for old browsers, such as ie6.
 
-sign in! click on the upload button or go to **/mh_pc_intro** to connect and interact with your **actual** youtube account.
-
-<img src="doc-imgs/signin-hppng.png" width="400">
-<img src="doc-imgs/signin-vidmngr.png" width="400">
-
 ---
 
-**over time, depending on your usage, yt2009 may take up a lot of space (counted in tens of gigabytes!)**
+**over time, depending on your usage, yt2012 may take up a lot of space (counted in tens of gigabytes!)**
 
 **if you need to reclaim space, look through the assets folder where downloaded files (such as images, videos) are saved and delete ones you need.**
 
@@ -100,9 +86,9 @@ alternatively, set up auto_maintain as described in yt2009setup to handle this f
 
 ## notes, docs
 
-over time some tools and documentation was written about yt2009. for an easy reference, those are listed below.
+over time some tools and documentation was written about yt2012. for an easy reference, those are listed below.
 
-- [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with yt2009
+- [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with yt2012
 - [config_params.md](config_params.md) - a list of ALL available config options.
 - [docker.md](docker.md) - yt2009 setup with docker. also listed in the setup section. (thanks, breakgimme!)
 - [flash_additions.md](flash_additions.md) - some info on caption and annotations modules within the default 2009 flash player.
