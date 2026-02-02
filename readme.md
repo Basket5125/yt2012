@@ -1,8 +1,8 @@
-# yt2009
-a fairly accurate 2009 youtube frontend with account features.
+# yt2012 BETA
+a fairly accurate 2012 youtube frontend based on yt2009.
 
-<img src="doc-imgs/ie6-ss.png" width="400">
-<img src="doc-imgs/ie6-ss2.png" width="400">
+<img src="doc-imgs/homepage1.jpg" width="400">
+<img src="doc-imgs/watch1.jpg" width="400">
 
 ---
 
