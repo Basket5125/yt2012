@@ -278,13 +278,20 @@ if(!config.disableWs) {
                         break;
                     }
                     case "version-warning": {
-                        if(m.version !== version) {
-                            yt2009_home({
-                                "type": "version-warning",
-                                "version": m.version,
-                                "current": version
-                            }, () => {})
-                        }
+                        yt2009_home({
+                            "type": "version-warning",
+                            "version": m.version,
+                            "current": version
+                        }, () => {})
+                        let msg = [
+                            "=========\n\n",
+                            "your yt2009 version is out of date",
+                            "and may cause issues with core features",
+                            "(video playback, page loading, etc..)",
+                            "update for best experience.\n\n",
+                            "========="
+                        ].join("\n")
+                        console.log(msg)
                         break;
                     }
                     case "c-sup-data": {
@@ -2143,6 +2150,14 @@ app.get("/yt2009_flags.htm", (req, res) => {
         flagsPage = flagsPage.replace(
             `onclick="update_cookies();"`,
             `onclick="update_cookies_f();"`
+        )
+    }
+
+    if((req.headers.cookie || "").includes("pchelper_user=")) {
+        flagsPage = flagsPage.replace(
+            `<!--yt2009_pchelper_ref-->`,
+            `<a href="/mh_pc_manage" id="pchelper-ref">(zarządzanie pchelper)</a>
+            <br><br>`
         )
     }
 
@@ -5145,12 +5160,33 @@ app.get("/get_notifications", (req, res) => {
     && req.headers.cookie.includes("syncses=")) {
         session = req.headers.cookie.split("syncses=")[1].split(";")[0]
     }
-    if(!session) {res.sendStatus(401);return;}
 
+    let addPchelper = false;
+    let syncNotifsRef = []
+    if(mobileHelper.hasLogin(req)) {
+        addPchelper = true;
+        mobileHelper.getNotifications(req, (data) => {
+            setTimeout(() => {
+                // merge data and send
+                let n = []
+                data.forEach(z => {n.push(z)})
+                syncNotifsRef.forEach(z => {n.push(z)})
+                n = n.sort((a,b) => {
+                    return b.time - a.time
+                })
+                res.send(n)
+            }, 150)
+        })
+    }
+
+    if(!session && !addPchelper) {res.sendStatus(401);return;}
 
     let id = Math.floor(Math.random() * 5949534534)
     syncInboxCallbacks[id] = function(msg) {
-        res.send(msg.data)
+        syncNotifsRef = msg.data
+        if(!addPchelper) {
+            res.send(msg.data)
+        }
     }
     try {
         yt2009_exports.read().masterWs.send(JSON.stringify({
@@ -5163,7 +5199,9 @@ app.get("/get_notifications", (req, res) => {
         }, 5000)
     }
     catch(error) {
-        res.send([])
+        if(!addPchelper) {
+            res.send([])
+        }
     }
 })
 
@@ -5596,6 +5634,20 @@ thumbnailProxyEndpoints.forEach(t => {
         if(req.headers.cookie
         && req.headers.cookie.includes("autogen_thumbnails")) {
             thumbFile = "1.jpg"
+        }
+        switch(req.query.alt) {
+            case "1": {
+                thumbFile = "1.jpg"
+                break;
+            }
+            case "2": {
+                thumbFile = "2.jpg"
+                break;
+            }
+            case "3": {
+                thumbFile = "3.jpg"
+                break;
+            }
         }
         const fetch = require("node-fetch")
         fetch("http://i.ytimg.com/vi/" + id + "/" + thumbFile, {
@@ -6581,6 +6633,7 @@ app.get("/stream_get_fragment", (req, res) => {
         }
         rHeaders["Content-Type"] = "application/x-protobuf"
         rHeaders["x-goog-api-format-version"] = "2"
+        rHeaders["x-goog-visitor-id"] = yt2009_exports.read().visitor
         yt2009_utils.craftPlayerProto(v, (pbmsg) => {
             fetch("https://youtubei.googleapis.com/youtubei/v1/player", {
                 "headers": rHeaders,

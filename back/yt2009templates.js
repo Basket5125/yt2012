@@ -1009,8 +1009,8 @@ module.exports = {
             hqUrl += "&" + trustedContextData.hq;
         }
         let seekbarRemoveWidth = 245
-        if(videoLengthMinutes && videoLengthMinutes >= 100) {
-            seekbarRemoveWidth = 265
+        if(videoLengthMinutes && videoLengthMinutes >= 60) {
+            seekbarRemoveWidth = 277
         } else if(videoLengthMinutes && videoLengthMinutes >= 10) {
             seekbarRemoveWidth = 255
         }
@@ -1898,8 +1898,9 @@ module.exports = {
         <span>“${term}”</span>
     </div>`
     },
-    "latestChip": "8gYuGix6KhImCiQ2N2FiOTYwMC0wMDAwLTI0N2QtYjAyYi01ODI0MjljNmI1ZjggBA%3D%3D",
-    "popularChip": "8gYuGix6KhImCiQ2N2FiOTYwMC0wMDAwLTI0N2QtYjAyYi01ODI0MjljNmI1ZjggAg%3D%3D",
+    "latestChip": "8gZYGlZ6VBImCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQgBEIoCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQYBA%3D%3D",
+    "popularChip": "8gZYGlZ6VBImCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQgAkIoCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQYAg%3D%3D",
+    "liveVideosChip": "8gZYGlZyVBImCiQ2OWUwZWMwNy0wMDAwLTI1YzctOWEyYS1mNDAzMDQ1ZGIzNDAoDEIoCiQ2OWUwZWMwNy0wMDAwLTI1YzctOWEyYS1mNDAzMDQ1ZGIzNDAYDA%3D%3D",
     "replyTemplate": function(commentIndex, video, loginSimulateName) {
         return `
     <div id="div_comment_form_id_${commentIndex}">
@@ -2591,7 +2592,7 @@ module.exports = {
                 <div class="statModule-item-line">
                     <div class="statModule-item-text">
                         <button class="master-sprite img-general-messages yt2009-side-icon"></button>
-                        <a href="/inbox">lang_hp_messages_prefix0 lang_hp_messages</a>
+                        <a href="/inbox?folder=personal">lang_hp_messages_prefix0 lang_hp_messages</a>
                     </div>
                 </div>
                 <div class="statModule-item-line">
@@ -3515,8 +3516,8 @@ term='channel'/>
 
     "playerHDSabr": function(use720p, autoHQ, videoLengthMinutes, srData, exactData) {
         let seekbarRemoveWidth = 245
-        if(videoLengthMinutes && videoLengthMinutes >= 100) {
-            seekbarRemoveWidth = 265
+        if(videoLengthMinutes && videoLengthMinutes >= 60) {
+            seekbarRemoveWidth = 277
         } else if(videoLengthMinutes && videoLengthMinutes >= 10) {
             seekbarRemoveWidth = 255
         }

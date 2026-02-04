@@ -47,6 +47,8 @@ function section_fill(code, section_name, section_content, flags, req) {
         }
     }
 
+    title = yt2009utils.xss(title).split("\"").join("&quot;")
+
     views = "lang_views_prefix" + views.replace(" views", "lang_views_suffix")
 
     let thumbUrl = yt2009utils.getThumbUrl(section_content.id, req)
@@ -315,6 +317,7 @@ module.exports = function(req, res) {
     if(customHomepageText) {
         addNotice = true;
         noticeText = require("./config.json").customHomepageText
+                   || customHomepageText
     }
 
     let ytsessions = {
