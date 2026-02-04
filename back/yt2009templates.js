@@ -6,17 +6,10 @@ templates for individual yt2009 parts fillable with function calls.
 const utils = require("./yt2009utils")
 const config = require("./config.json")
 const langs = require("./language_data/language_engine")
+const yt2009videohelpers = require("./yt2009videohelpers");
 
 module.exports = {
-    "videoComment": function(
-        authorUrl, authorName, commentTime,
-        content, flags, useLanguage, likes,
-        id, replyData, additionalRenderHeader
-    ) {
-        if(!additionalRenderHeader) {
-            additionalRenderHeader = ""
-        }
-
+    "videoComment": function(authorUrl, authorName, commentTime, content, flags, useLanguage, likes, id, replyData) {
         if(commentTime.includes("in playlist")) {
             commentTime = commentTime.split("in playlist")[0]
         }
@@ -73,67 +66,131 @@ module.exports = {
         }
         let dislikeCode = `onclick="sendCmtRating('${id}', 'dislike');return false;"`
         let likeCode = `onclick="sendCmtRating('${id}', 'like');return false;"`
-        return `<div class="watch-comment-entry" ${id ? `id="comment-${id}"` : ""}>
-            <div class="watch-comment-head">
-                <div class="watch-comment-info">
-                    <a class="watch-comment-auth" href="${authorUrl}" rel="nofollow">${authorName}</a>
-                    <span class="watch-comment-time"> (${commentTime}) ${utils.xss(additionalRenderHeader)}</span>
-                </div>
-                <div class="watch-comment-voting">
-                    <span class="watch-comment-score watch-comment-${likeColor}" data-initial="${likes || 0}">${likePrefix}${likes || 0}</span>
-                    <a href="#" ${id && flags.includes("login_simulate") ? dislikeCode : ""}><button class="master-sprite watch-comment-down${flags.includes("login_simulate") ? "-hover" : ""}" title="Poor comment"></button></a>
-                    <a href="#" ${id && flags.includes("login_simulate") ? likeCode : ""}><button class="master-sprite watch-comment-up${flags.includes("login_simulate") ? "-hover" : ""}" title="Good comment"></button></a>
-                    <span class="watch-comment-msg"></span>
-                </div>
-                <span class="watch-comment-spam-bug">Marked as spam</span>
-                <div class="watch-comment-action">
-                    <a onclick="showReplyForm(this)">${useLanguage ? "lang_comment_reply" : "Reply"}</a>
-                    ${flags.includes("login_simulate") ? `
-                    |
-                    <a title="Flag this comment as Spam" onclick="mSpam(this)">Spam</a>` : ""}
-                </div>
-                <div class="clearL"></div>
-            </div>
-    
-            <div>
-                <div class="watch-comment-body">
-                    <div>
-                        ${content}
-                    </div>
-                </div>
-                <div></div>
-            </div>${replyCode}
-        </div>${replyHolderCode}`
+        return `
+        
+        <li class="comment yt-tile-default  last" ${id ? `id="comment-${id}"` : ""}>
+
+            <div class="comment-body">
+                <div class="content-container">
+                    <div class="content">
+                    <div class="comment-text" dir="ltr">
+          <p>${content}</p>
+        </div>
+      <p class="metadata">
+        <span class="author ">
+                <a href="${authorUrl}" class="yt-user-name " dir="ltr">
+      ${authorName}
+    </a>
+        <span>
+        <span class="time">
+          ${commentTime}
+        </span>
+      </p>
+    </div>
+      <div class="comment-actions">
+<span class="yt-uix-button-group">
+    <button type="button" 
+            class="start comment-action-vote-up comment-action yt-uix-button yt-uix-tooltip yt-uix-button-empty" 
+            onclick="${id && flags.includes("login_simulate") ? 'sendCmtRating(\'' + id + '\', \'like\');return false;' : ';return false;'}" 
+            title="Vote Up" 
+            data-action="vote-up" 
+            data-tooltip-show-delay="300" 
+            role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-watch-comment-vote-up" 
+             src="/assets/site-assets/pixel-vfl3z5WfW.gif" 
+             alt="Vote Up">
+    </button>
+    <button type="button" 
+            class="end comment-action-vote-down comment-action yt-uix-button yt-uix-tooltip yt-uix-button-empty" 
+            onclick="${id && flags.includes("login_simulate") ? 'sendCmtRating(\'' + id + '\', \'dislike\');return false;' : ';return false;'}" 
+            title="Vote Down" 
+            data-action="vote-down" 
+            data-tooltip-show-delay="300" 
+            role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-watch-comment-vote-down" 
+             src="/assets/site-assets/pixel-vfl3z5WfW.gif" 
+             alt="Vote Down">
+    </button>
+</span>
+
+<span class="yt-uix-button-group">
+    <button type="button" 
+            class="start comment-action yt-uix-button" 
+            onclick="showReplyForm(this)"
+            data-action="reply" 
+            role="button">
+        <span class="yt-uix-button-content">${useLanguage ? "lang_comment_reply" : "Reply"}</span>
+    </button>
+    <button type="button" 
+            class="end flip yt-uix-button yt-uix-button-empty" 
+            onclick=";return false;" 
+            data-button-has-sibling-menu="true" 
+            role="button" 
+            aria-pressed="false" 
+            aria-expanded="false" 
+            aria-haspopup="true" 
+            aria-activedescendant="">
+        <img class="yt-uix-button-arrow" 
+             src="/assets/site-assets/pixel-vfl3z5WfW.gif" 
+             alt="">
+        <div class="yt-uix-button-menu" style="display: none;">
+            <ul>
+                <li class="comment-action" data-action="share">
+                    <span class="yt-uix-button-menu-item">Share</span>
+                </li>
+                <li class="comment-action-remove comment-action" data-action="remove">
+                    <span class="yt-uix-button-menu-item">Remove</span>
+                </li>
+                <li class="comment-action" data-action="flag">
+                    <span class="yt-uix-button-menu-item">Flag for spam</span>
+                </li>
+                <li class="comment-action-block comment-action" data-action="block">
+                    <span class="yt-uix-button-menu-item">Block User</span>
+                </li>
+                <li class="comment-action-unblock comment-action" data-action="unblock">
+                    <span class="yt-uix-button-menu-item">Unblock User</span>
+                </li>
+            </ul>
+        </div>
+    </button>
+</span>
+
+  </div>
+
+    </div>
+  </li>`
     },
-    "relatedVideo": function(id, title, protocol, length, viewCount, creatorUrl, creatorName, flags, playlistId, isSelf) {
+    "relatedVideo": function(id, title, protocol, length, viewCount, creatorUrl, creatorName, flags, playlistId) {
         if(creatorName.startsWith("by ")) {
             creatorName = creatorName.replace("by ", "")
         }
         let thumbUrl = utils.getThumbUrl(id, flags)
-        return `<div class="video-entry${isSelf ? " watch-ppv-vid" : ""}" data-id="${id}">
-                    <div class="v90WideEntry">
-                        <div class="v90WrapperOuter">
-                            <div class="v90WrapperInner">
-                                <a href="/watch?v=${id}${playlistId ? "&list=" + playlistId : ""}" class="video-thumb-link" rel="nofollow"><img title="${title.split('"').join("&quot;")}" thumb="${thumbUrl}" src="${thumbUrl}" class="vimg90" qlicon="${id}" alt="${title.split('"').join("&quot;")}}" ${flags.includes("/wayback") ? `onload="checkExists(this)"` : ""}></a>
-        
-                                <div class="addtoQL90"><a href="#" ql="${id}" title="lang_add_to_ql"><button title="" class="master-sprite QLIconImg" onclick="addToQuicklist('${id}', '${encodeURIComponent(title).split("'").join("\\'")}', '${encodeURIComponent(creatorName)}')"></button></a>
-                                    <div class="hid quicklist-inlist"><a href="#">lang_ql_added</a></div>
-                                </div>
-        
-                                ${length !== "" ? `<div class="video-time"><a href="/watch?v=${id}${playlistId ? "&list=" + playlistId : ""}" rel="nofollow">${length}</a></div>` : ""}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-main-content">
-                        <div class="video-mini-title">
-                        <a href="/watch?v=${id}${playlistId ? "&list=" + playlistId : ""}" rel="nofollow">${title}</a></div>
-                        <div class="video-view-count">${viewCount}</div>
-                        <div class="video-username"><a href="${creatorUrl}">${creatorUrl.includes("/user/") && flags.includes("author_old_names") ? creatorUrl.split("/user/")[1] : creatorName}</a>
-                        </div>
-                    </div>
-                    <span class="abs-views hid">${viewCount.replace(/[^0-9]/g, "")}</span>
-                    <div class="video-clear-list-left"></div>
-                </div>`;
+        return ` <li class="video-list-item">
+                     <a href="/watch?v=${id}${playlistId ? "&list=" + playlistId : ""}" class="video-list-item-link">
+                    <span class="ux-thumb-wrap contains-addto">
+                        <span class="video-thumb ux-thumb ux-thumb-110">
+                            <span class="clip">
+                                <img src="${thumbUrl}" alt="Thumbnail" data-thumb="${thumbUrl}">
+                             </span>
+                        </span>
+                        <span class="video-time">${length}</span>
+                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="jnuvrlk5As0" data-feature="thumbnail" role="button">
+                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                            <span class="yt-uix-button-content">
+                                <span class="addto-label">Add to</span>
+                            </span>
+                            <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                        </button>
+                    </span>
+                    <span dir="ltr" class="title" title="${title.split('"').join("&quot;")}">
+                        ${title.split('"').join("&quot;")}
+                    </span>
+                    <span class="stat">
+                        by <span class="yt-user-name" dir="ltr">${creatorName}</span>
+                    </span>
+                    <span class="stat view-count">${viewCount.replace(/[^0-9]/g, "")} views</span>
+                </a>
+            </li>`
     },
     "videoResponse": function(id, time, uploaderName, uploaderUrl, req) {
         let thumbUrl = utils.getThumbUrl(id, req)
@@ -289,61 +346,70 @@ module.exports = {
         description = description.split("$").join("&#36;")
         authorName = authorName.split("$").join("&#36;")
         return `
-        <div class="video-cell" data-id="${id}">
-            <div class="video-entry">
-                <div class="v120WideEntry">
-                    <div class="v120WrapperOuter">
-                        <div class="v120WrapperInner">
-                            <a id="video-title-results" href="/watch?v=${id}" rel="nofollow">
-                                <img title="${utils.xss(title.split('"').join("&quot;"))}" src="${thumbUrl}" class="vimg120">
-                            </a>
-                            <div id="quicklist-icon-${id}" class="addtoQL90"><a id="add-to-quicklist-${id}" href="#" ql="${id}" title="lang_add_to_ql"><button class="master-sprite QLIconImg ${browser == "firefox" ? "firefox" : ""} title="" onclick="addToQuicklist('${id}', '${encodeURIComponent(title).split("'").join("\\'")}', '${encodeURIComponent(authorName)}')"></button></a>
-                                <div class="hid quicklist-inlist"><a href="#">lang_ql_added</a></div>
-                            </div>
-                            <div class="video-time ${browser == "chrome" ? "chrome" : ""}"><span id="video-run-time">${time}</span></div>
-                        </div>
-                    </div>
-                </div>
-    
-                <div class="video-main-content" id="video-main-content">
-                    <div class="video-title video-title-results">
-                        <div class="video-short-title">
-                            <a id="video-short-title" href="/watch?v=${id}" title="${utils.xss(title.split('"').join("&quot;"))}" rel="nofollow">${title}</a>
-                        </div>
-                        <div class="video-long-title">
-                            <a id="video-long-title" href="/watch?v=${id}" title="${utils.xss(title.split('"').join("&quot;"))}" rel="nofollow">${title}</a>
-                        </div>
-                    </div>
-    
-                    <div id="video-description" class="video-description">
-                        ${description}
-                    </div>
-    
-                    <div class="result-label">
-                        <span class="result-type">Video:</span>
-                        <span class="video-username"><a id="video-from-username" class="hLink" href="${authorUrl}">${utils.xss(authorName)}</a></span>
-                    </div>
-    
-                    <div class="video-facets">
-                        <span id="video-average-rating" class="video-rating-list">
-                            <div>
-                                <button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button>
-                            </div>
-                        </span>
-    
-                        <span id="video-added-time" class="video-date-added">${uploadDate}</span>
-                        <span id="video-num-views" class="video-view-count">${viewCount}</span>
-                        <span class="video-username"><a id="video-from-username" class="hLink" href="${authorUrl}">${utils.xss(authorName)}</a></span>
-                        <span id="video-average-rating" class="video-rating-grid ">
-                            <div>
-                                <button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button>
-                            </div>
-                        </span>
-                    </div>
-                </div>
-                <div class="video-clear-list-left"></div>
-            </div>
-        </div>`
+        <div class="result-item yt-uix-tile yt-tile-default *sr">
+    <div class="thumb-container">
+      <a href="/watch?v=${id}" class="ux-thumb-wrap contains-addto result-item-thumb">
+      <span class="video-thumb ux-thumb ux-thumb-128 ">
+        <span class="clip">
+          <span class="clip-inner">
+            <img onload="tn_load(6)" alt="Thumbnail" src="${thumbUrl}">
+            <span class="vertical-align">
+            </span>
+          </span>
+        </span>
+      </span>
+
+    <span class="video-time">${time}
+  </span>
+
+  <button onclick=";return false;" title="Watch Later" type="button" class="addto-button video-actions addto-watch-later-button-sign-in yt-uix-button yt-uix-button-default yt-uix-button-short yt-uix-tooltip" data-button-menu-id="shared-addto-watch-later-login" data-video-ids="${id}" role="button">
+  <span class="yt-uix-button-content">
+    <span class="addto-label">
+    Watch Later
+    </span>
+      <span class="addto-label-error">
+    Error
+      </span>
+        <img src="/assets/site-assets/pixel-vfl3z5WfW.gif">
+     </span>
+        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+          </button>
+            </a>
+              </div>
+                <div class="result-item-main-content">
+      
+  <div class="video-translation-links">
+  <div class="hid">video lang: en
+  </div>
+  	<div style="display:none" id="translate_link_W0quDfpfRUQ" class="grayText smallText hid">
+  	<a class="yt-badge-std" onclick="yt.www.translation.translateVideoMainContent(&quot;W0quDfpfRUQ&quot;, &quot;en&quot;, 0); return false;" href="#">Translate
+  	</a>
+  	</div>
+  		<div id="untranslate_link_W0quDfpfRUQ" class="grayText smallText hid">
+  		<a class="yt-badge-std" onclick="yt.www.translation.untranslateVideoMainContent(&quot;W0quDfpfRUQ&quot;); return false;" href="#">View original</a>
+  		</div>
+ 			 <div id="translate_disabled_W0quDfpfRUQ" class="grayText smallText hid">
+ 			 (Translation disabled)
+ 			 </div>
+  </div>
+<h3 id="video-long-title-W0quDfpfRUQ">
+<a href="/watch?v=${id}" class="yt-uix-tile-link" dir="ltr" title="${title}">${title}</a>
+</h3>
+  <p id="video-description-W0quDfpfRUQ" class="description " dir="ltr">
+  ${description}
+  </p>
+   <p class="facets">
+    <span class="username-prepend">by</span>
+    <a href="${authorUrl}" class="yt-user-name " dir="ltr">
+    ${utils.xss(authorName)}
+    </a>
+       <span class="metadata-separator">|</span>
+            <span class="date-added">${uploadDate}</span>
+                <span class="metadata-separator">|</span>
+                    <span class="viewcount">${viewCount}</span>
+      </p>
+    </div>
+  </div>`
     },
     "warpVideo": function(id, title, length, creatorName, video_index, description, views, rating, uploaded) {
         if(typeof(views) == "string") {
@@ -353,12 +419,12 @@ module.exports = {
     <video>
         <author>${creatorName}</author>
         <id>${id}</id>
-        <title>${title.split("&").join("")}</title>
+        <title>${title}</title>
         <length_seconds>${utils.time_to_seconds(length)}</length_seconds>
         <run_time>${length}</run_time>
         <rating_avg>${rating}</rating_avg>
         <rating_count>${Math.floor(views / 150)}</rating_count>
-        <description>${description.split("&").join("") || "."}</description>
+        <description>${description || "."}</description>
         <view_count>${views}</view_count>
         <upload_time>${utils.relativeToAbsoluteApprox(uploaded || "1 day ago")}</upload_time>
         <comment_count>${Math.floor(views / 170)}</comment_count>
@@ -462,31 +528,67 @@ module.exports = {
             catch(error) {}
         }
         return `
-        <div class="video-cell *vl" style="width:19.5%" data-id="${id}">
-            <div class="video-entry yt-uix-hovercard">
-                <div class="v120WideEntry">
-                    <div class="v120WrapperOuter">
-                        <div class="v120WrapperInner">
-                            <a class="video-thumb-link" href="/watch?v=${id}" rel="nofollow"><img title="${title.split("\"").join("&quot;")}" src="${thumbUrl}" onmouseover="videosPreview(this, '${id}')" onmouseout="removeVideoPreview()"></a>
-
-                            <div class="addtoQL90"><a href="#" ql="${id}" title="${noLang ? "lang_add_to_ql": "Add Video to Quickist"}"><button title="" class="master-sprite QLIconImg" onclick="addToQuicklist('${id}', '${encodeURIComponent(title).split("'").join("\\'")}', '${encodeURIComponent(uploaderName.split(" ").join(""))}')"></button></a>
-                                <div class="hid quicklist-inlist"><a href="#">${noLang ? "lang_ql_added" : "Added to Quicklist"}</a></div>
+        <li class="feed-item-container">
+                            <div class="feed-item upload">
+                                <div class="feed-item-content">
+                                    <span class="feed-item-author">
+                                    <a href="${uploaderUrl}" class="yt-user-photo ">
+                                        <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                            <span class="clip"><span class="profile-centering-wrap">
+                                                <img src="" alt="${flags.includes("remove_username_space") ? uploaderName.split(" ").join("") : uploaderName}" data-thumb="${thumbUrl}">
+                                            </span>
+                                        </span>
+                                    </span>
+                            <span class="feed-item-owner">
+                                <a href="${uploaderUrl}" class="yt-user-name " dir="ltr">
+                                    ${flags.includes("remove_username_space") ? uploaderName.split(" ").join("") : uploaderName}
+                                </a>
+                            </span>
+                            lang_results_uploaded
+                                <span class="time-created">
+                                    2 days ago
+                                </span>
+                    <div class="feed-item-visual">
+                        <div class="feed-item-visual-thumb">
+                            <a class="ux-thumb-wrap contains-addto" href="/watch?v=${id}"">
+                                <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                    <span class="clip">
+                                        <img src="${thumbUrl}" alt="Thumbnail" data-thumb="${thumbUrl}" onmouseover="videosPreview(this, '${id}')" onmouseout="removeVideoPreview()">
+                                    </span>
+                                </span>
+                                <span class="video-time">2:37</span>
+                                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                            <span class="yt-uix-button-content">
+                                                <span class="addto-label">
+                                                    Add to
+                                                </span>
+                                            </span>
+                                        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                    </button>
+                                </a>
+                            </div>
+                        <div class="feed-item-visual-content">
+                            <div class="feed-item-visual-description">
+                                <h4>
+                                    <a class="title" href="/watch?v=${id}" title="${title.split("\"").join("&quot;")} dir="ltr">${title}</a>
+                                </h4>
+                            <div class="description" dir="ltr">
+                                yt2009_watchednow3_description
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="video-main-content">
-                    <div class="video-title ">
-                        <div class="video-short-title">
-                            <a href="/watch?v=${id}" class="yt-uix-hovercard-target" title="${title.split("\"").join("&quot;")}" rel="nofollow">${title}</a>
+                            <p class="metadata">
+                                <a href="${uploaderUrl}" class="yt-user-name " dir="ltr">
+                                    ${uploaderUrl}${flags.includes("remove_username_space") ? uploaderName.split(" ").join("") : uploaderName}
+                                </a>
+                            <span class="view-count">
+                                ${viewCount} views
+                            </span>
+                            </p>
+
                         </div>
                     </div>
-                    <div class="video-facets">
-                        <span class="video-view-count">${viewCount}</span>
-                        <span class="video-username"><a class="hLink" href="${uploaderUrl}">${flags.includes("remove_username_space") ? uploaderName.split(" ").join("") : uploaderName}</a></span>
-                    </div>
                 </div>
-                <div class="video-clear-list-left"></div>
             </div>
         </div>`
     },
@@ -586,19 +688,37 @@ module.exports = {
     },
     "searchChannel": function(url, avatar, name, subscribers) {
         return `
-        <div class="channel-cell" style="height: 90px;">
-            <div class="channel-entry yt-uix-hovercard">
-                <div class="user-thumb-large" style="float: left;">
-                    <div><a href="${url}"><img class="yt-uix-hovercard-target" src="${avatar}"></a></div>
-                </div>
-                <div class="channel-main-content" style="float: left;margin-left: 8px;margin-top: 3px;">
-                    <div class="channel-title">
-                        <div class="channel-long-title"><a href="${url}" title="${name}" rel="nofollow">${name}</a></div>
-                    </div>
-                    <div class="channel-facets"><span>${subscribers.replace(/ subscriber.*/g, "lang_results_channel_sub_suffix")}</span></div>
-                </div>
-            </div>
-        </div>`
+    <div class="result-item yt-uix-tile yt-tile-default *sr channel">
+    	<div class="thumb-container">
+        	<a href="${url}" class="ux-thumb-wrap result-item-thumb">
+                <span class="video-thumb ux-thumb ux-thumb-profile-77">
+                    <span class="clip">
+                        <span class="clip-inner">
+                            <img onload="" alt="Thumbnail" src="${avatar}">
+                            <span class="vertical-align">
+                            </span>
+                        </span>
+                    </span>
+                </span>
+            </a>
+        </div>
+        <div class="result-item-main-content">
+            <h3>
+                <a href="${url}" class="yt-uix-tile-link" dir="ltr" title="${name}">${name}</a>
+            </h3>
+    <ul class="single-line-lego-list">
+        <li>
+            <a href="/results?search_query=${name}&search_type=search_users" class="yt-badge-std">CHANNEL</a>
+        </li>
+    </ul>
+    <p class="facets">
+        <span class="username-prepend">by</span>
+            <a href="${url}" class="yt-user-name " dir="ltr">${name}</a>
+                <span class="metadata-separator">|</span>
+    <span class="channel-subscriber-count">
+    ${subscribers.replace(/ subscriber.*/g, "lang_results_channel_sub_suffix")}
+    </span>
+    </p></div></div>`
     },
     "searchPlaylistEntry": function(id, protocol, videos, name, videoCount, a, flags) {
         let navUrl = `/playlist?list=${id}`
@@ -724,7 +844,6 @@ module.exports = {
     </div>
     </div>`,
     "playnavPlaylist": function(playlist, protocol, useLanguage) {
-        if(!playlist.id) return ""
         return `
         <div class="playnav-item playnav-playlist" onclick="openPlaylist(this);return false;" data-id="${playlist.id}">
             <div class="content">
@@ -1009,8 +1128,8 @@ module.exports = {
             hqUrl += "&" + trustedContextData.hq;
         }
         let seekbarRemoveWidth = 245
-        if(videoLengthMinutes && videoLengthMinutes >= 60) {
-            seekbarRemoveWidth = 277
+        if(videoLengthMinutes && videoLengthMinutes >= 100) {
+            seekbarRemoveWidth = 265
         } else if(videoLengthMinutes && videoLengthMinutes >= 10) {
             seekbarRemoveWidth = 255
         }
@@ -1352,7 +1471,6 @@ module.exports = {
 </entry>` 
     },
     "gdata_playlistEntry": function(author, playlistId, playlistName, vidCount, summary) {
-        if(!playlistId) return "";
         return `
     <entry>
 	    <id>http://${config.ip}:${config.port}/feeds/api/users/${author}/playlists/${playlistId}</id>
@@ -1422,146 +1540,90 @@ module.exports = {
         <yt:playlistId>${playlistId}</yt:playlistId>
         <playlistId>${playlistId}</playlistId>`
     },
-    "homepage_recommended": `<div id="feedmodule-REC" class="feedmodule-anchor">
-                    <div class="feedmodule-modheader" id="REC-titlebar">
-                        <div id="feed_recommended">
-                            <div class="fm2-title-border-box-gray yt-rounded">
-                                <div class="fm2-title">
-                                    <img class="img_feed_recommended master-sprite fm2-icon" src="/assets/site-assets/pixel-vfl73.gif">
-                                    <span class="fm2-titleText" id="feed_recommended-titleText">lang_hp_recommended</span>
-                                </div>
-                                <div class="feedmodule-preamble yt2009-signin-hide" style="border-bottom: 1px dotted;" id="yt2009-rec-learn-more">
-                                    <a href="#">lang_hp_learnmore</a>
-                                </div>
-                                <div class="feedmodule-updown">
-                                    <span id="medit-REC" class="iyt-edit-link iyt-edit-link-gray" onclick="recommended_edit_show();">lang_hp_edit</span>
-                                    <span id="mup-REC" class="up-button" onclick="moveUp('rec')">
-                                        <img class="master-sprite img-php-up-arrow" src="/assets/site-assets/pixel-vfl73.gif">
-                                    </span>
-                                    <span id="mdown-REC" class="down-button" onclick="moveDown('rec')">
-                                        <img class="master-sprite img-php-down-arrow"  src="/assets/site-assets/pixel-vfl73.gif">
-                                    </span>
-                                    <span id="mclose-REC" onclick="removeModule('rec')">
-                                        <img class="master-sprite img-php-close-button" src="/assets/site-assets/pixel-vfl73.gif">
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="clear feedmodule-border-gray yt-rounded" id="feed_recommended-content">
-                        <div id="REC-data" class="feedmodule-data">
-                            <div id="REC-options" class="opt-pane hid">
-                                <div class="opt-box-top">
-                                    <img class="homepage-ajax-sprite img-php-opt-box-caret" src="/assets/site-assets/pixel-vfl73.gif">
-                                </div>
-                                <div class="opt-banner">
-                                    <div class="opt-links">
-                                        <div class="opt-edit grayText">Editing: Recommended for You</div>
-                                        <div class="opt-close opt-close-text iyt-edit-link" onclick="recommended_edit_hide();">close</div>
-                                        <div id="REC-loading-msg" class="opt-loading-msg" style="display: none;">
-                                            Saving...
-                                        </div>
-                                        <div class="clear"></div>
-                                    </div>
-                                </div>
-                                <div class="opt-main">
-                                    <div class="opt-divider">
-                                        <table class="opt-tbl">
-                                            <tbody>
-                                                <tr>
-                                                    <td class="opt-name">
-                                                        Display as:
-                                                    </td>
-                                                    <td class="opt-val opt-sel">
-                                                        <div id="REC-options-SIN" class="opt-form-type-btns">
-                                                            <img src="/assets/site-assets/pixel-vfl73.gif" class="homepage-ajax-sprite btn-listview-off" title="List View" alt="List View" id="rec-style-list" onclick="homepageRecSet('list')"><img src="/assets/site-assets/pixel-vfl73.gif" id="rec-style-grid" class="homepage-ajax-sprite btn-gridview-on" title="Grid View" alt="Grid View" onclick="homepageRecSet('grid')">
-                                                        </div>
-                                                    </td>
-                                                    <td class="opt-name" id="reco-opt-num-picker">
-                                                        Number of rows to display:
-                                                    </td>
-                                                    <td class="opt-val">
-                                                        <select id="REC-options-num" name="REC-options-num" onchange="homepageRecSet('rows')">
-                                                            <option value="1">1</option>
-                                                            <option value="2" selected>2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                            <option value="5">5</option>
-                                                        </select>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="logged_out_rec_learn_more_box" class="yt-rounded side-announcement-box" style="margin: 5px 10px 5px 5px; padding: 5px; display: none;">
-                                <div style="cursor: pointer; display:inline; float: right;" id="yt2009-rec-more-close"><img class="img-php-close-button master-sprite" style="background-position: -57px -712px;" src="/assets/site-assets/pixel-vfl73.gif"></div>
-                                <div style="color: black; padding-left: 5px;">
-                                    lang_hp_rec_desc_p1lang_hp_rec_desc_p2
-                                </div>
-                                <div style="color: black; padding-left: 5px; padding-right: 10px; margin-top: 10px;">
-                                    lang_hp_rec_desc_p3
-                                </div>
-                            </div>
-                            <div class="feedmodule-body grid-view" id="REC-feedmodule-body">
+    "homepage_recommended": `<div class="feed-container" data-paging="" data-filter-type="" id="REC-feedmodule-body">
+                                <div class="feed-page">
+                                    <ul id="yt2009-recommended-cells-container">
                                 <div id="recommended-loading-sprite"><img src="/assets/site-assets/icn_loading_animated-vfl24663.gif" style="margin-left: 310px;margin-top: 30px;margin-bottom: 30px;"></div>
-                                <div class="clearL yt2009-cells-container" id="yt2009-recommended-cells-container">
-                                    
+                                </ul>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="clear"></div>
-                </div>
+                                </div>
                 <script src="/assets/site-assets/homepage-recommended.js"></script>`,
     "recommended_videoCell": function(video, req, flags) {
+        
         let thumbUrl = utils.getThumbUrl(video.id, req)
         let creatorName = video.author_name || video.creatorName;
         if(flags && flags.includes("username_asciify")) {
             creatorName = utils.asciify(creatorName)
         }
-        return `<div class="video-cell" style="width:24.5%" data-id="${video.id}">
-        <div class="video-entry yt-uix-hovercard">
-            <div class="v120WideEntry">
-                <div class="v120WrapperOuter">
-                    <div class="v120WrapperInner"><a id="video-url-${video.id}" class="video-thumb-link" href="/watch?v=${video.id}" rel="nofollow"><img title="${video.title.split(`"`).join(`&quot;`)}" src="${thumbUrl}" class="vimg120 yt-uix-hovercard-target"></a>
-                        <div id="quicklist-icon-${video.id}" class="addtoQL90"><a id="add-to-quicklist-${video.id}" href="#" ql="${video.id}" title="lang_add_to_ql" onclick="addToQuicklist('${video.id}', '${video.title.split(`'`).join("&quot;").split(`"`).join("&quot;")}', '${creatorName.split(`'`).join("&quot;").split(`"`).join("&quot;")}')"><button class="master-sprite QLIconImg" title=""></button></a>
-                            <div class="hid quicklist-inlist"><a href="/my_quicklist">lang_ql_added_homepage</a></div>
+        let videoDescription = yt2009videohelpers.get_video_description(video.id);
+        videoDescription = videoDescription.split("$").join("&#36;");;
+        return `<li class="feed-item-container">
+                            <div class="feed-item upload">
+                                <div class="feed-item-content">
+                                <h3 class="feed-item-title">
+                                    <span class="feed-item-author">
+                                    <a href="${video.author_url || video.creatorUrl}" class="yt-user-photo ">
+                                        <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                            <span class="clip"><span class="profile-centering-wrap">
+                                                <img src="/assets/site-assets/new-hq-default.png" alt="${creatorName}" data-thumb="/assets/site-assets/new-hq-default.png">
+                                            </span>
+                                        </span>
+                                    </span>
+                                    </span>
+                            <span class="feed-item-owner">
+                                <a href="${video.author_url || video.creatorUrl}" class="yt-user-name " dir="ltr">
+                                    ${creatorName}
+                                </a>
+                            </span>
+                            lang_results_uploaded
+                                <span class="time-created">
+                                   ${!video.o ? utils.relativeTimeCreate(utils.fakeDatesModern("2010-04-02", utils.relativeToAbsoluteApprox(video.upload)), langs.get_language(req)) : video.upload}
+                                </span>
+                                </h3>
+                    <div class="feed-item-visual">
+                        <div class="feed-item-visual-thumb">
+                            <a class="ux-thumb-wrap contains-addto" href="/watch?v=${video.id}">
+                                <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                    <span class="clip">
+                                        <img src="${thumbUrl}" alt="Thumbnail" data-thumb="${thumbUrl}">
+                                    </span>
+                                </span>
+                                <span class="video-time">${video.length}</span>
+                                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                            <span class="yt-uix-button-content">
+                                                <span class="addto-label">
+                                                    Add to
+                                                </span>
+                                            </span>
+                                        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                    </button>
+                                </a>
+                            </div>
+                        <div class="feed-item-visual-content">
+                            <div class="feed-item-visual-description">
+                                <h4>
+                                    <a class="title" href="/watch?v=${video.id}" dir="ltr">${video.title}</a>
+                                </h4>
+                            <div class="description" dir="ltr">
+                              ${videoDescription}  
+                            </div>
                         </div>
-                        <div class="video-time"><a id="video-run-time-${video.id}" href="/watch?v=${video.id}" rel="nofollow">${video.length}</a></div>
-                    </div>
-                </div>
-            </div>
-            <div class="video-main-content" id="video-main-content-${video.id}">
-                <div class="video-title ">
-                    <div class="video-short-title">
-                        <a id="video-short-title-${video.id}" href="/watch?v=${video.id}" class="yt-uix-hovercard-target" title="${video.title.split(`"`).join(`&quot;`)}" rel="nofollow">${video.title}</a>
-                    </div>
-                </div>
-                <div class="video-facets">
-                    <span id="video-average-rating-${video.id}" class="video-rating-list ">
-                        <div>
-                            <button class="master-sprite ratingVS ratingVS-4.5" title="4.5"></button>
-                        </div>
-                    </span>
-                    <span id="video-added-time-${video.id}" class="video-date-added">${!video.o ? utils.relativeTimeCreate(
-                        utils.fakeDatesModern("2010-04-02", utils.relativeToAbsoluteApprox(video.upload)), langs.get_language(req)
-                    ) : video.upload}</span>
-                    <span id="video-num-views-${video.id}" class="video-view-count">lang_views_prefix${utils.countBreakup(
+                            <p class="metadata">
+                                <a href="${video.author_url || video.creatorUrl}" class="yt-user-name " dir="ltr">
+                                    ${creatorName}
+                                </a>
+                            <span class="view-count">
+                                lang_views_prefix${utils.countBreakup(
                         utils.bareCount(video.views || "0")
-                    )}lang_views_suffix</span>
-                    <span id="video-average-rating-${video.id}" class="video-rating-grid ">
-                        <div>
-                            <button class="master-sprite ratingVS ratingVS-4.5" title="4.5"></button>
+                    )}lang_views_suffix
+                            </span>
+                            </p>
                         </div>
-                    </span>
-                    <span class="video-username"><a id="video-from-username-${video.id}" class="hLink" href="${video.author_url || video.creatorUrl}">${creatorName}</a></span>
+                    </div>
                 </div>
             </div>
-            <div class="video-clear-list-left"></div>
-        </div>
-    </div>`
+        </div>`
     },
     "videosFooterPaging": function(page, pages, url) {
         let htmlBox = `
@@ -1586,22 +1648,22 @@ module.exports = {
 
         // previous button
         if(pages[0] > 1) {
-            htmlBox += `<a href="${basePagingUrl}${c}p=${page - 1}" class="pagerNotCurrent">Previous</a>`
+            htmlBox += `<a href="${basePagingUrl}${c}p=${page - 1}" class="yt-uix-button yt-uix-pager-previous yt-uix-pager-button yt-uix-button-default" ><span class="yt-uix-button-content">previous «</span></a>&nbsp;`
         }
 
 
         // add <a> elements
         pages.forEach(possiblePage => {
             if(possiblePage == page) {
-                htmlBox += `<span class="pagerCurrent">${page}</span>`
+                htmlBox += `<span class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-toggled yt-uix-button-default" data-page="${page}" aria-label="Go to page ${page}"><span class="yt-uix-button-content">${page}</span></a>&nbsp;`
             } else {
-                htmlBox += `<a href="${basePagingUrl}${c}p=${possiblePage}" class="pagerNotCurrent">${possiblePage}</a>`
+                htmlBox += `<a href="${basePagingUrl}${c}p=${possiblePage}" class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-default" data-page="${possiblePage}" aria-label="Go to page ${possiblePage}"><span class="yt-uix-button-content">${possiblePage}</span></a>&nbsp;`
             }
         })
 
         // next button
         if(pages.includes(page + 1)) {
-            htmlBox += `<a href="${basePagingUrl}${c}p=${page + 1}" class="pagerNotCurrent">Next</a>`
+            htmlBox += `<a href="${basePagingUrl}${c}p=${page + 1}"class="yt-uix-button yt-uix-pager-next yt-uix-pager-button yt-uix-button-default" ><span class="yt-uix-button-content">Next »</span></a>&nbsp;`
         }
 
         htmlBox += `</div>
@@ -1806,13 +1868,14 @@ module.exports = {
     "langPickerBase": `
     <div id="language-picker">
         <div class="picker-top" style="">
-            <h2>Set Your Language Preference</h2>
-            <div id="language-picker-help">
-                <a href="#" class="picker-help-link">(What is this?)</a>
-            </div>
+            <h2>Choose your language</h2>
             <div class="box-close-link">
                 <img onclick="closeLangPicker()" src="/assets/site-assets/pixel-vfl73.gif" alt="Close">
             </div>
+            <div id="language-picker-help">
+                <p>Choose the language in which you want to view YouTube. This will only change the interface, not any text entered by other users. </p>
+            </div>
+
             <div class="clearR"></div>
         </div>
         <div class="flag-list">
@@ -1898,9 +1961,8 @@ module.exports = {
         <span>“${term}”</span>
     </div>`
     },
-    "latestChip": "8gZYGlZ6VBImCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQgBEIoCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQYBA%3D%3D",
-    "popularChip": "8gZYGlZ6VBImCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQgAkIoCiQ2OWRlMDk5Ny0wMDAwLTJhMjItYTRkMS1mNDAzMDQzOTNjMDQYAg%3D%3D",
-    "liveVideosChip": "8gZYGlZyVBImCiQ2OWUwZWMwNy0wMDAwLTI1YzctOWEyYS1mNDAzMDQ1ZGIzNDAoDEIoCiQ2OWUwZWMwNy0wMDAwLTI1YzctOWEyYS1mNDAzMDQ1ZGIzNDAYDA%3D%3D",
+    "latestChip": "8gYuGix6KhImCiQ2N2FiOTYwMC0wMDAwLTI0N2QtYjAyYi01ODI0MjljNmI1ZjggBA%3D%3D",
+    "popularChip": "8gYuGix6KhImCiQ2N2FiOTYwMC0wMDAwLTI0N2QtYjAyYi01ODI0MjljNmI1ZjggAg%3D%3D",
     "replyTemplate": function(commentIndex, video, loginSimulateName) {
         return `
     <div id="div_comment_form_id_${commentIndex}">
@@ -1959,7 +2021,7 @@ module.exports = {
     </div>`
     },
     "csPager": function(pageNum, url, prev) {
-        return `<a href="${url}" class="pagerNotCurrent" data-page="${pageNum}">${prev ? "Previous" : "Next"}</a>`
+        return `<a href="${url}" class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-default" data-page="${pageNum}" aria-label="Go to page ${pageNum}"><span class="yt-uix-button-content">${pageNum}</span></a>&nbsp;`
     },
     "watchpageTurn": function(posExclude) {
         return `
@@ -1978,284 +2040,372 @@ module.exports = {
             </div>
         </div>`
     },
-    "homepage_watched": `
-    <div id="feedmodule-POP" class="feedmodule-anchor yt2009_mark_hid_if_needed">
-        <div class="feedmodule-modheader" id="POP-titlebar">
+    "homepage_watched": `<li class="feed-item-container">
+                            <div class="feed-item upload">
+                                <div class="feed-item-content">
+                                    <span class="feed-item-author">
+                                    <a href="yt2009_watchednow0_uploader_url" class="yt-user-photo ">
+                                        <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                            <span class="clip"><span class="profile-centering-wrap">
+                                                <img src="/assets/site-assets/new-hq-default.png" alt="yt2009_watchednow0_uploader_name" data-thumb="/assets/site-assets/new-hq-default.png>
+                                            </span>
+                                        </span>
+                                    </span>
+                            <span class="feed-item-owner">
+                                <a href="yt2009_watchednow0_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow0_uploader_name
+                                </a>
+                            </span>
+                            lang_results_uploaded
+                                <span class="time-created">
+                                    2 days ago
+                                </span>
+                    <div class="feed-item-visual">
+                        <div class="feed-item-visual-thumb">
+                            <a class="ux-thumb-wrap contains-addto" href="/yt2009_featured1_watch">
+                                <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                    <span class="clip">
+                                        <img src="/yt2009_watchednow0_thumbnail" alt="Thumbnail" data-thumb="/yt2009_watchednow0_thumbnail">
+                                    </span>
+                                </span>
+                                <span class="video-time">2:37</span>
+                                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                            <span class="yt-uix-button-content">
+                                                <span class="addto-label">
+                                                    Add to
+                                                </span>
+                                            </span>
+                                        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                    </button>
+                                </a>
+                            </div>
+                        <div class="feed-item-visual-content">
+                            <div class="feed-item-visual-description">
+                                <h4>
+                                    <a class="title" href="/yt2009_featured1_watch" dir="ltr">yt2009_watchednow0_title</a>
+                                </h4>
+                            <div class="description" dir="ltr">
+                                
+                            </div>
+                        </div>
+                            <p class="metadata">
+                                <a href="yt2009_watchednow0_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow0_uploader_name
+                                </a>
+                            <span class="view-count">
+                                yt2009_watchednow0_views
+                            </span>
+                            </p>
 
-            <div id="feed_popular">
-                <div class="fm2-title-border-box-gray yt-rounded">
-                    <div class="fm2-title">
-                        <img class="img_feed_popular master-sprite fm2-icon" src="/assets/site-assets/pixel-vfl73.gif" />
-                        <span class="fm2-titleText" id="feed_popular-titleText">lang_hp_watched</span>
+                        </div>
                     </div>
+                </div>
+            </div>
+                <li class="feed-item-container">
+                            <div class="feed-item upload">
+                                <div class="feed-item-content">
+                                    <span class="feed-item-author">
+                                        <a href="yt2009_watchednow1_uploader_url" class="yt-user-photo ">
+                                        <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                            <span class="clip"><span class="profile-centering-wrap">
+                                                <img src="/assets/site-assets/new-hq-default.png" alt="yt2009_watchednow1_uploader_name" data-thumb="/assets/site-assets/new-hq-default.png>
+                                            </span>
+                                        </span>
+                                    </span>
+                            <span class="feed-item-owner">
+                                <a href="yt2009_watchednow1_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow1_uploader_name
+                                </a>
+                            </span>
+                            lang_results_uploaded
+                                <span class="time-created">
+                                    2 days ago
+                                </span>
+                    <div class="feed-item-visual">
+                        <div class="feed-item-visual-thumb">
+                            <a class="ux-thumb-wrap contains-addto" href="/yt2009_watchednow1_watch">
+                                <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                    <span class="clip">
+                                        <img src="/yt2009_watchednow1_thumbnail" alt="Thumbnail" data-thumb="/yt2009_watchednow1_thumbnail">
+                                    </span>
+                                </span>
+                                <span class="video-time">2:37</span>
+                                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                            <span class="yt-uix-button-content">
+                                                <span class="addto-label">
+                                                    Add to
+                                                </span>
+                                            </span>
+                                        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                    </button>
+                                </a>
+                            </div>
+                        <div class="feed-item-visual-content">
+                            <div class="feed-item-visual-description">
+                                <h4>
+                                    <a class="title" href="/yt2009_watchednow1_watch" dir="ltr">yt2009_watchednow1_title</a>
+                                </h4>
+                            <div class="description" dir="ltr">
+                                
+                            </div>
+                        </div>
+                            <p class="metadata">
+                                <a href="/yt2009_watchednow1_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow1_uploader_name
+                                </a>
+                            <span class="view-count">
+                                yt2009_watchednow1_views
+                            </span>
+                            </p>
 
-                    <div class="feedmodule-preamble">
-                        <a href="/videos?s=pop">lang_hp_viewall</a>
+                        </div>
                     </div>
-                    <div class="feedmodule-updown">
-                        <span id="medit-POP" class="iyt-edit-link iyt-edit-link-gray">lang_hp_edit</span>
-                        <span id="mup-POP" class="up-button" onclick="moveUp('watched')">
-                        <img class="master-sprite img-php-up-arrow" src="/assets/site-assets/pixel-vfl73.gif" /></span>
-                        <span id="mdown-POP" class="down-button" onclick="moveDown('watched')">
-                        <img class="master-sprite img-php-down-arrow" src="/assets/site-assets/pixel-vfl73.gif"/></span>
-                        <span id="mclose-POP" onclick="removeModule('watched')">
-                        <img class="master-sprite img-php-close-button" src="/assets/site-assets/pixel-vfl73.gif" /></span>
-                    </div>
+                </div>
+            </div>
 
+                <li class="feed-item-container">
+                        <div class="feed-item upload">
+                            <div class="feed-item-content">
+                                <span class="feed-item-author">
+                                <a href="yt2009_watchednow2_uploader_url" class="yt-user-photo ">
+                                    <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                        <span class="clip"><span class="profile-centering-wrap">
+                                            <img src="/assets/site-assets/new-hq-default.png" alt="yt2009_watchednow2_uploader_name" data-thumb="/assets/site-assets/new-hq-default.png">
+                                        </span>
+                                    </span>
+                                </span>
+                        <span class="feed-item-owner">
+                            <a href="yt2009_watchednow2_uploader_url" class="yt-user-name " dir="ltr">
+                                yt2009_watchednow2_uploader_name
+                            </a>
+                        </span>
+                        lang_results_uploaded
+                            <span class="time-created">
+                                2 days ago
+                            </span>
+                <div class="feed-item-visual">
+                    <div class="feed-item-visual-thumb">
+                        <a class="ux-thumb-wrap contains-addto" href="/yt2009_watchednow2_watch">
+                            <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                <span class="clip">
+                                    <img src="/yt2009_watchednow2_thumbnail" alt="Thumbnail" data-thumb="/yt2009_watchednow2_thumbnail">
+                                </span>
+                            </span>
+                            <span class="video-time">2:37</span>
+                                <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                    <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                        <span class="yt-uix-button-content">
+                                            <span class="addto-label">
+                                                Add to
+                                        </span>
+                                        </span>
+                                    <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                </button>
+                            </a>
+                        </div>
+                    <div class="feed-item-visual-content">
+                        <div class="feed-item-visual-description">
+                            <h4>
+                                <a class="title" href="/yt2009_watchednow2_watch" dir="ltr">yt2009_watchednow2_title</a>
+                            </h4>
+                        <div class="description" dir="ltr">
+                        </div>
+                    </div>
+                        <p class="metadata">
+                            <a href="yt2009_watchednow2_uploader_url" class="yt-user-name " dir="ltr">
+                                yt2009_watchednow2_uploader_name
+                            </a>
+                        <span class="view-count">
+                            yt2009_watchednow2_views
+                        </span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
+                        <li class="feed-item-container">
+                            <div class="feed-item upload">
+                                <div class="feed-item-content">
+                                    <span class="feed-item-author">
+                                    <a href="yt2009_watchednow3_uploader_url" class="yt-user-photo ">
+                                        <span class="video-thumb ux-thumb ux-thumb-profile-24">
+                                            <span class="clip"><span class="profile-centering-wrap">
+                                                <img src="/assets/site-assets/new-hq-default.png" alt="yt2009_watchednow3_uploader_name" data-thumb="/assets/site-assets/new-hq-default.png">
+                                            </span>
+                                        </span>
+                                    </span>
+                            <span class="feed-item-owner">
+                                <a href="yt2009_watchednow3_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow3_uploader_name
+                                </a>
+                            </span>
+                            lang_results_uploaded
+                                <span class="time-created">
+                                    2 days ago
+                                </span>
+                    <div class="feed-item-visual">
+                        <div class="feed-item-visual-thumb">
+                            <a class="ux-thumb-wrap contains-addto" href="/yt2009_watchednow3_watch">
+                                <span class="video-thumb ux-thumb ux-thumb-288 ">
+                                    <span class="clip">
+                                        <img src="/yt2009_watchednow3_thumbnail" alt="Thumbnail" data-thumb="/yt2009_watchednow3_thumbnail">
+                                    </span>
+                                </span>
+                                <span class="video-time">2:37</span>
+                                    <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="DFLoY7y9GhA" data-feature="thumbnail" role="button">
+                                        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                            <span class="yt-uix-button-content">
+                                                <span class="addto-label">
+                                                    Add to
+                                                </span>
+                                            </span>
+                                        <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+                                    </button>
+                                </a>
+                            </div>
+                        <div class="feed-item-visual-content">
+                            <div class="feed-item-visual-description">
+                                <h4>
+                                    <a class="title" href="/yt2009_watchednow3_watch" dir="ltr">yt2009_watchednow3_title</a>
+                                </h4>
+                            <div class="description" dir="ltr">
+                            </div>
+                        </div>
+                            <p class="metadata">
+                                <a href="yt2009_watchednow3_uploader_url" class="yt-user-name " dir="ltr">
+                                    yt2009_watchednow3_uploader_name
+                                </a>
+                            <span class="view-count">
+                                yt2009_watchednow3_views
+                            </span>
+                            </p>
 
-        <div class="clear feedmodule-border-gray yt-rounded" id="feed_popular-content">
-            <div id="POP-data" class="feedmodule-data">
-                <div class="feedmodule-body bigthumb-view">
-                    <div class="feeditem-bigthumb super-large-video yt-uix-hovercard ">
-                        <div style="font-size: 12px;" class="floatL">
-                            <div class="feedmodule-thumbnail">
-                                <div class="v220WideEntry">
-                                    <div class="v220WrapperOuter">
-                                        <div class="v220WrapperInner">
-                                            <a class="video-thumb-link" href="/yt2009_watchednow0_watch" rel="nofollow"><img title="yt2009_watchednow0_title" src="/yt2009_watchednow0_thumbnail" class="vimg220 yt-uix-hovercard-target"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                        <div class="feedmodule-singleform-info">
-                            <div class="video-title"><a href="/yt2009_watchednow0_watch" class="yt-uix-hovercard-target" title="yt2009_watchednow0_title">yt2009_watchednow0_title</a></div>
-                            <div>yt2009_watchednow0_views</div>
-                            <div><nobr><a href="yt2009_watchednow0_uploader_url">yt2009_watchednow0_uploader_name</a></nobr></div>
-                            <div class="feedmodule-singleform-info-ratings"><span><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></span></div>
-                        </div>
-                        <div class="spacer">&nbsp;</div>
                     </div>
-                    <div class="feeditem-bigthumb normal-size-video yt-uix-hovercard ">
-                        <div style="font-size: 12px;" class="floatL">
-                            <div class="feedmodule-thumbnail">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link" href="/yt2009_watchednow1_watch" rel="nofollow"><img title="yt2009_watchednow1_title" src="/yt2009_watchednow1_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="feedmodule-singleform-info">
-                            <div class="video-title">
-                            <a href="/yt2009_watchednow1_watch" class="yt-uix-hovercard-target">yt2009_watchednow1_title</a></div>
-                            <div>yt2009_watchednow1_views</div>
-                            <div><nobr><a href="yt2009_watchednow1_uploader_url">yt2009_watchednow1_uploader_name</a></nobr></div>
-                            <div class="feedmodule-singleform-info-ratings"><span><button class="master-sprite ratingVS ratingVS-4.5" title="4.5"></button></span></div>
-                        </div>
-                        <div class="spacer">&nbsp;</div>
-                    </div>
-                    <div class="feeditem-bigthumb normal-size-video yt-uix-hovercard ">
-                        <div style="font-size: 12px;" class="floatL">
-                            <div class="feedmodule-thumbnail">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link" href="/yt2009_watchednow2_watch" rel="nofollow"><img title="yt2009_watchednow2_title" src="/yt2009_watchednow2_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="feedmodule-singleform-info">
-                            <div class="video-title">
-                            <a href="/yt2009_watchednow2_watch" class="yt-uix-hovercard-target">yt2009_watchednow2_title</a></div>
-                            <div>yt2009_watchednow2_views</div>
-                            <div><nobr><a href="yt2009_watchednow2_uploader_url">yt2009_watchednow2_uploader_name</a></nobr></div>
-                            <div class="feedmodule-singleform-info-ratings"><span><button class="master-sprite ratingVS ratingVS-4.5" title="4.5"></button></span></div>
-                        </div>
-                        <div class="spacer">&nbsp;</div>
-                    </div>
-                    <div class="feeditem-bigthumb normal-size-video yt-uix-hovercard ">
-                        <div style="font-size: 12px;" class="floatL">
-                            <div class="feedmodule-thumbnail">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link" href="/yt2009_watchednow3_watch" rel="nofollow"><img title="yt2009_watchednow3_title" src="/yt2009_watchednow3_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="feedmodule-singleform-info">
-                            <div class="video-title">
-                            <a href="/yt2009_watchednow3_watch" class="yt-uix-hovercard-target">yt2009_watchednow3_title</a></div>
-                            <div>yt2009_watchednow3_views</div>
-                            <div><nobr><a href="yt2009_watchednow3_uploader_url">yt2009_watchednow3_uploader_name</a></nobr></div>
-                            <div class="feedmodule-singleform-info-ratings"><span><button class="master-sprite ratingVS ratingVS-4.5" title="4.5"></button></span></div>
-                        </div>
-                        <div class="spacer">&nbsp;</div>
-                    </div>
-
-                    <div class="spacer">&nbsp;</div>
                 </div>
             </div>
         </div>
-        <div class="clear"></div>
-    </div>`,
+        </div>`,
     "homepage_featured": `
-    <div id="feedmodule-PRO" class="feedmodule-anchor">
-        <div class="feedmodule-modheader" id="PRO-titlebar">
-            <div id="feed_promoted">
-                <div class="fm2-title-border-box-blue yt-rounded">
-                    <div class="fm2-title">
-                        <img class="img_feed_promoted master-sprite fm2-icon" src="/assets/site-assets/pixel-vfl73.gif" />
-                        <span class="fm2-titleText" id="feed_promoted-titleText">lang_hp_featured</span>
-                    </div>
+    <li class="video-list-item ">
+        <a href="/yt2009_featured0_watch" class="video-list-item-link ">
+            <span class="ux-thumb-wrap contains-addto ">
+                <span class="video-thumb ux-thumb ux-thumb-110 ">
+              <span class="clip">
+                 <img src="/yt2009_featured0_thumbnail" alt="Thumbnail" data-thumb="/yt2009_featured0_thumbnail">
+             </span>
+          </span>
+        <span class="video-time">yt2009_featured0_time</span>
+        <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="0BIEMXOMyB0" data-feature="thumbnail"    role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+            <span class="yt-uix-button-content">
+                <span class="addto-label">lang_userpage_addto</span>
+                </span>
+                 <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+             </button>
+            </span>
+            <span dir="ltr" class="title" title="yt2009_featured0_title">yt2009_featured0_title</span>
+                <span class="stat">by
+                    <span class="yt-user-name " dir="ltr">
+            yt2009_featured0_uploader_name
+            </span>
+                </span>
+                    <span class="stat view-count">yt2009_featured0_views
+                    </span>
+                    </a>
+                </li>
 
-                    <div class="feedmodule-updown">
-                        <span id="mup-PRO" class="up-button" onclick="moveUp('featured')">
-                        <img class="master-sprite img-php-up-arrow" src="/assets/site-assets/pixel-vfl73.gif"/></span>
-                        <span id="mdown-PRO" class="down-button" onclick="moveDown('featured')">
-                        <img class="master-sprite img-php-down-arrow" src="/assets/site-assets/pixel-vfl73.gif" /></span>
-                        <span id="mclose-PRO" onclick="removeModule('featured')">
-                        <img class="master-sprite img-php-close-button" src="/assets/site-assets/pixel-vfl73.gif"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <li class="video-list-item ">
+        <a href="/yt2009_featured1_watch" class="video-list-item-link ">
+            <span class="ux-thumb-wrap contains-addto ">
+                <span class="video-thumb ux-thumb ux-thumb-110 ">
+              <span class="clip">
+                 <img src="/yt2009_featured1_thumbnail" alt="Thumbnail" data-thumb="/yt2009_featured1_thumbnail">
+             </span>
+          </span>
+        <span class="video-time">yt2009_featured1_time</span>
+        <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="0BIEMXOMyB0" data-feature="thumbnail"    role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+            <span class="yt-uix-button-content">
+                <span class="addto-label">lang_userpage_addto</span>
+                </span>
+                 <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+             </button>
+            </span>
+            <span dir="ltr" class="title" title="yt2009_featured1_title">yt2009_featured1_title</span>
+                <span class="stat">by
+                    <span class="yt-user-name " dir="ltr">
+            yt2009_featured1_uploader_name
+            </span>
+                </span>
+                    <span class="stat view-count">yt2009_featured1_views
+                    </span>
+                    </a>
+                </li>
 
-        <div class="clear feedmodule-border-blue yt-rounded" id="feed_promoted-content">
-            <div id="PRO-data" class="feedmodule-data">
+                            <li class="video-list-item ">
+        <a href="/yt2009_featured2_watch" class="video-list-item-link ">
+            <span class="ux-thumb-wrap contains-addto ">
+                <span class="video-thumb ux-thumb ux-thumb-110 ">
+              <span class="clip">
+                 <img src="/yt2009_featured2_thumbnail" alt="Thumbnail" data-thumb="/yt2009_featured2_thumbnail">
+             </span>
+          </span>
+        <span class="video-time">yt2009_featured2_time</span>
+        <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="0BIEMXOMyB0" data-feature="thumbnail"    role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+            <span class="yt-uix-button-content">
+                <span class="addto-label">lang_userpage_addto</span>
+                </span>
+                 <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+             </button>
+            </span>
+            <span dir="ltr" class="title" title="yt2009_featured2_title">yt2009_featured2_title</span>
+                <span class="stat">by
+                    <span class="yt-user-name " dir="ltr">
+            yt2009_featured2_uploader_name
+            </span>
+                </span>
+                    <span class="stat view-count">yt2009_featured2_views
+                    </span>
+                    </a>
+                </li>
 
-                <div class="feedmodule-body grid-view">
-                    <div class="clearL">
-
-                        <div class="video-cell" style="width:24.5%">
-                            <div class="video-entry yt-uix-hovercard">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link yt2009_f" href="/yt2009_featured0_watch" rel="nofollow"><img title="yt2009_featured0_title" src="/yt2009_featured0_thumbnail"></a>
-                                            <div class="video-time"><a href="/yt2009_featured0_watch" rel="nofollow">yt2009_featured0_time</a></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="video-main-content">
-                                    <div class="video-title ">
-                                        <div class="video-short-title">
-                                            <a href="/yt2009_featured0_watch" class="yt-uix-hovercard-target" title="yt2009_featured0_title" rel="nofollow">yt2009_featured0_title</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-facets">
-                                        <span class="video-rating-list "><div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div></span>
-                                        <span class="video-view-count">yt2009_featured0_views</span>
-                                        <span class="video-rating-grid ">
-                                        <div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div>
-                                        </span>
-                                        <span class="video-username"><a class="hLink" href="yt2009_featured0_uploader_url">yt2009_featured0_uploader_name</a></span>
-                                    </div>
-                                </div>
-                                <div class="video-clear-list-left"></div>
-                            </div>
-                        </div>
-
-                        <div class="video-cell" style="width:24.5%">
-                            <div class="video-entry yt-uix-hovercard">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link yt2009_f" href="/yt2009_featured1_watch" rel="nofollow"><img title="yt2009_featured1_title" src="/yt2009_featured1_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                            <div class="video-time"><a href="/yt2009_featured1_watch" rel="nofollow">yt2009_featured1_time</a></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="video-main-content">
-                                    <div class="video-title ">
-                                        <div class="video-short-title">
-                                            <a href="/yt2009_featured1_watch" class="yt-uix-hovercard-target"  rel="nofollow">yt2009_featured1_title</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-facets">
-                                        <span class="video-rating-list "><div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div></span>
-                                        <span class="video-view-count">yt2009_featured1_views</span>
-                                        <span class="video-rating-grid ">
-                                        <div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div>
-                                        </span>
-                                        <span class="video-username"><a class="hLink" href="yt2009_featured1_uploader_url">yt2009_featured1_uploader_name</a></span>
-                                    </div>
-                                </div>
-                                <div class="video-clear-list-left"></div>
-                            </div>
-                        </div>
-
-                        <div class="video-cell" style="width:24.5%">
-                            <div class="video-entry yt-uix-hovercard">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link yt2009_f" href="/yt2009_featured2_watch" rel="nofollow"><img title="yt2009_featured2_title" src="/yt2009_featured2_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                            <div class="video-time"><a href="/yt2009_featured2_watch" rel="nofollow">yt2009_featured2_time</a></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="video-main-content">
-                                    <div class="video-title ">
-                                        <div class="video-short-title">
-                                            <a href="/yt2009_featured2_watch" class="yt-uix-hovercard-target"  rel="nofollow">yt2009_featured2_title</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-facets">
-                                        <span class="video-rating-list "><div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div></span>
-                                        <span class="video-view-count">yt2009_featured2_views</span>
-                                        <span class="video-rating-grid ">
-                                        <div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div>
-                                        </span>
-                                        <span class="video-username"><a class="hLink" href="yt2009_featured2_uploader_url">yt2009_featured2_uploader_name</a></span>
-                                    </div>
-                                </div>
-                                <div class="video-clear-list-left"></div>
-                            </div>
-                        </div>
-
-                        <div class="video-cell" style="width:24.5%">
-                            <div class="video-entry yt-uix-hovercard">
-                                <div class="v120WideEntry">
-                                    <div class="v120WrapperOuter">
-                                        <div class="v120WrapperInner"><a class="video-thumb-link yt2009_f" href="/yt2009_featured3_watch" rel="nofollow"><img  src="/yt2009_featured3_thumbnail" class="vimg120 yt-uix-hovercard-target"></a>
-                                            <div class="video-time"><a href="/yt2009_featured3_watch" rel="nofollow">yt2009_featured3_time</a></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="video-main-content">
-                                    <div class="video-title ">
-                                        <div class="video-short-title">
-                                            <a href="/yt2009_featured3_watch" class="yt-uix-hovercard-target"  rel="nofollow">yt2009_featured3_title</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-facets">
-                                        <span class="video-rating-list "><div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div></span>
-                                        <span class="video-view-count">yt2009_featured3_views</span>
-                                        <span class="video-rating-grid ">
-                                        <div><button class="master-sprite ratingVS ratingVS-5.0" title="5.0"></button></div>
-                                        </span>
-                                        <span class="video-username"><a class="hLink" href="yt2009_featured3_uploader_url">yt2009_featured3_uploader_name</a></span>
-                                    </div>
-                                </div>
-                                <div class="video-clear-list-left"></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="clear"></div>
-    </div>`,
+        <li class="video-list-item ">
+        <a href="/yt2009_featured3_watch" class="video-list-item-link ">
+            <span class="ux-thumb-wrap contains-addto ">
+                <span class="video-thumb ux-thumb ux-thumb-110 ">
+              <span class="clip">
+                 <img src="/yt2009_featured3_thumbnail" alt="Thumbnail" data-thumb="/yt2009_featured3_thumbnail">
+             </span>
+          </span>
+        <span class="video-time">yt2009_featured3_time</span>
+        <button type="button" class="addto-button short video-actions yt-uix-button yt-uix-button-short" onclick=";return false;" data-button-menu-action="yt.www.lists.addto.toggleMenu" data-button-menu-id="shared-addto-menu" data-video-ids="0BIEMXOMyB0" data-feature="thumbnail"    role="button">
+        <img class="yt-uix-button-icon yt-uix-button-icon-addto" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+            <span class="yt-uix-button-content">
+                <span class="addto-label">lang_userpage_addto</span>
+                </span>
+                 <img class="yt-uix-button-arrow" src="/assets/site-assets/pixel-vfl3z5WfW.gif" alt="">
+             </button>
+            </span>
+            <span dir="ltr" class="title" title="yt2009_featured3_title">yt2009_featured3_title</span>
+                <span class="stat">by
+                    <span class="yt-user-name " dir="ltr">
+            yt2009_featured3_uploader_name
+            </span>
+                </span>
+                    <span class="stat view-count">yt2009_featured3_views
+                    </span>
+                    </a>
+                </li>`,
     "homepage_mostpopular": `
     <div id="feedmodule-TOP" class="feedmodule-anchor">
         <div class="feedmodule-modheader" id="TOP-titlebar">
 
             <div id="feed_top_videos">
                 <div class="fm2-title-border-box-gray yt-rounded">
-                    <div class="fm2-title">
-                        <img class="img_feed_top_videos master-sprite fm2-icon" src="/assets/site-assets/pixel-vfl73.gif" />
-                        <span class="fm2-titleText" id="feed_top_videos-titleText">lang_hp_pop</span>
-                    </div>
-
-                    <div class="feedmodule-preamble">
-                        <a href="/videos?s=pop">lang_hp_viewall</a>
-                    </div>
                     <div class="feedmodule-updown">
                         <span id="mup-TOP" class="up-button" onclick="moveUp('pop')">
                         <img class="master-sprite img-php-up-arrow" src="/assets/site-assets/pixel-vfl73.gif" /></span>
@@ -2592,7 +2742,7 @@ module.exports = {
                 <div class="statModule-item-line">
                     <div class="statModule-item-text">
                         <button class="master-sprite img-general-messages yt2009-side-icon"></button>
-                        <a href="/inbox?folder=personal">lang_hp_messages_prefix0 lang_hp_messages</a>
+                        <a href="/inbox">lang_hp_messages_prefix0 lang_hp_messages</a>
                     </div>
                 </div>
                 <div class="statModule-item-line">
@@ -2816,7 +2966,7 @@ module.exports = {
             <h2>Choose your content location</h2><br>
             <p style="clear: left;">Choose which country or region's content (videos and channels) you would like to view. This will not change the language of the site.</p>
             <div class="box-close-link">
-                <img onclick="closeLocPicker()" src="/assets/site-assets/pixel-vfl73.gif" alt="Close">
+                <img onclick="closeLangPicker()" src="/assets/site-assets/pixel-vfl73.gif" alt="Close">
             </div>
             <div class="clearR"></div>
         </div>
@@ -3452,19 +3602,11 @@ term='channel'/>
     
     "recentActivityPost": function(p, index, req) {
         //console.log(p)
-        let useFmode = (
-            req.query.f=="1"
-            || (req.headers.cookie
-            && (req.headers.cookie.indexOf("f_mode=on")!==-1))
-        )
         let imagesHTML = ""
         if(p.attachments) {
             p.attachments.forEach(img => {
                 if(img.imageAttachmentSmall) {
-                    let url = !useFmode
-                            ? `/avatar_wait?av=${encodeURIComponent(img.imageAttachmentSmall)}`
-                            : `/fmodecomunitab?i=${utils.fmodeComunitab.assign(img.imageAttachmentSmall)}`
-                    imagesHTML += `<div style="float:left; margin-right: 8px;"><img class="feed-image" src="${url}"/></div>`
+                    imagesHTML += `<div style="float:left; margin-right: 8px;"><img class="feed-image" src="/avatar_wait?av=${encodeURIComponent(img.imageAttachmentSmall)}"/></div>`
                 }
             })
         }
@@ -3514,10 +3656,10 @@ term='channel'/>
         <div class="clear"></div>
     </div>`,
 
-    "playerHDSabr": function(use720p, autoHQ, videoLengthMinutes, srData, exactData) {
+    "playerHDSabr": function(use720p, autoHQ, videoLengthMinutes, srData) {
         let seekbarRemoveWidth = 245
-        if(videoLengthMinutes && videoLengthMinutes >= 60) {
-            seekbarRemoveWidth = 277
+        if(videoLengthMinutes && videoLengthMinutes >= 100) {
+            seekbarRemoveWidth = 265
         } else if(videoLengthMinutes && videoLengthMinutes >= 10) {
             seekbarRemoveWidth = 255
         }
@@ -3528,24 +3670,15 @@ term='channel'/>
 				return z;
 			})
 		}
-        if(exactData) {
-            exactData = exactData.map(s => {
-                let z = JSON.parse(JSON.stringify(s))
-                z[4] = z[4].split("\"").join("\\\"")
-                return z;
-            })
-        }
         return `
         //exp_hq
         seekbarRemoveWidth = ${seekbarRemoveWidth};
         adjustSeekbarWidth();
         var sabrHd = false;
 		${srData ? `
-		var sabrSrData = '${JSON.stringify(srData)}';` : ""}
+		var sabrSrData = '${JSON.stringify(srData)}'` : ""}
         ${autoHQ ? `
         sabrHd = true;` : ""}
-        ${exactData ? `
-        var sabrExactRes = '${JSON.stringify(exactData)}';` : ""}
 
         // hd/hq playback
         $(".video_controls .hq").addEventListener("click", function() {
@@ -3578,7 +3711,7 @@ term='channel'/>
             if(pageNumber == i) {
                 html += `<span class="pagerCurrent">${i + 1}</span>`
             } else {
-                html += `<a href="#" onclick="navClPage(${i}, ${pageCount})" class="pagerNotCurrent">${i + 1}</a>`
+                html += `<a href="#" onclick="navClPage(${i}, ${pageCount})" class="yt-uix-button yt-uix-pager-page-num yt-uix-pager-button yt-uix-button-toggled yt-uix-button-default">${i + 1}</a>`
             }
         }
         html += "</div></div>"
@@ -3735,8 +3868,8 @@ term='channel'/>
         return `<a href="javascript:void(0)" onclick="loadReplies('${continuation}', this, '${commentId}');return false;" class="watch-replies-show-link">» lang_watch_replies_more</a>`
     },
 
-    "playnavContMore": function(continuation, otherContainer) {
-        return `<div class="playnav-more" id="playnav-more-continuation"><a class="channel-cmd" href="#" onclick="playnav_more('${continuation}'${otherContainer ? `, '${otherContainer}')` : ")"}">lang_playnav_more</a></div>`
+    "playnavContMore": function(continuation) {
+        return `<div class="playnav-more" id="playnav-more-continuation"><a class="channel-cmd" href="#" onclick="playnav_more('${continuation}')">lang_playnav_more</a></div>`
     },
 
     "clientsideRydScript": `
@@ -3789,9 +3922,5 @@ video_id=${req.query.video_id}`.split("\n").join("&"))
     
     "disabledCommentsNotice": `<div id="watch-comment-post">
         <b>lang_watch_comments_disabled_notice</b>
-    </div>`,
-
-    "web_playlists_loadmore_btn": function(token) {
-        return `<div id="continuation-load-container"><a class="yt-button yt-button-primary" href="javascript:void(0)" onclick="loadmore_pl('${token}');"><span>lang_vl_loadmore</span></a></div>`
-    }
+    </div>`
 }

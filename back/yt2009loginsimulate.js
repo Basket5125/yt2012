@@ -1,33 +1,39 @@
 const base_code_logged_in = `
-<style>.yt-menulink-menu a {padding: 5px 8px;display: block;}</style>
-<div id="masthead-utility">
-    <span class="utility-item" id="masthead-utility-menulink-long">
-        <span class="yt-menulink yt-menulink-primary" id="" style="" onmouseenter="this.className += ' yt-menulink-primary-hover';" onmouseleave="this.className = this.className.replace(' yt-menulink-primary-hover', '');">
-            <a class="yt-menulink-btn yt-button yt-button-primary">yt2009_username</a>
-            <a class="yt-menulink-arr"></a>
-            <span class="yt-menulink-menu">
-                <span><a href="/account">Account</a></span>
-                <span><a href="/my_videos">My Videos</a></span>
-                <span><a href="/my_favorites">Favorites</a></span>
-                <span><a href="/my_playlists">Playlists</a></span>
-            </span>
-        </span>
+<div id="masthead-user" style="cursor: pointer;"><span id="masthead-gaia-user-expander" class="masthead-user-menu-expander masthead-expander">
+    <span id="masthead-gaia-user-wrapper" class="yt-rounded" tabindex="0">yt2009_username</span>
     </span>
-    <span class="utility-item">
-        <button class="master-sprite img-general-messages" title="Inbox"></button>
-        <a href="/inbox" class="notif-count hid">(0)</a>
-    </span>
-    <span class="utility-item"><a href="/logout">Sign Out</a></span>
-</div>
-<script src="/assets/site-assets/notifications.js"></script>
+<span id="masthead-gaia-photo-expander" class="masthead-user-menu-expander masthead-expander">
+<span id="masthead-gaia-photo-wrapper" class="yt-rounded">
+<span id="masthead-gaia-user-image">
+<span class="clip">
+<span class="clip-center">
+<img src="/assets/site-assets/new-hq-default.png" alt="">
+<span class="vertical-center"></span>
+</span>
+</span>
+</span>
+<span class="masthead-expander-arrow"></span>
+</span>
+</span></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mastheadUser = document.getElementById('masthead-user');
+    const mastheadExpanded = document.getElementById('masthead-expanded');
+    
+    if (mastheadUser && mastheadExpanded) {
+        mastheadUser.addEventListener('click', function() {
+            // Przełącz klasę 'hid' - usuwa jeśli istnieje, dodaje jeśli nie
+            mastheadExpanded.classList.toggle('hid');
+        });
+    }
+});
+</script>
 `
 
-const base_code_logged_out = `
-<span class="utility-item">
-	<a href="#"><strong>Create Account</strong></a>
-	<span class="utility-joiner">or</span>
-	<a href="/signin">Sign In</a>
-</span>`
+
+const base_code_logged_out = `<a class="start spf-link" href="/mh_pc_intro">lang_create_btn</a>    
+        <span class="masthead-link-separator">|</span>  
+        <a class="end" href="/mh_pc_manage">lang_sign_btn</a>`
 
 module.exports = function(req, code, returnNoLang) {
     let flags = req.query && req.query.flags ? req.query.flags + ":" : ""
@@ -59,18 +65,10 @@ module.exports = function(req, code, returnNoLang) {
         }
     }
 
-    let unasciifyLogin = flags.includes("unasciify_login")
-
     if(loggedInUsername) {
-        if(unasciifyLogin) {
-            loggedInUsername = require("./yt2009utils").xss(
-                decodeURIComponent(loggedInUsername)
-            ).substring(0,40)
-        } else {
-            loggedInUsername = require("./yt2009utils").asciify(
-                decodeURIComponent(loggedInUsername), true, true
-            ).substring(0, 20)
-        }
+        loggedInUsername = require("./yt2009utils").asciify(
+            decodeURIComponent(loggedInUsername), true, true
+        ).substring(0, 20)
         if(loggedInUsername.length == 0) {
             loggedInUsername = "guest"
         }

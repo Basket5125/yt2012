@@ -47,8 +47,6 @@ function section_fill(code, section_name, section_content, flags, req) {
         }
     }
 
-    title = yt2009utils.xss(title).split("\"").join("&quot;")
-
     views = "lang_views_prefix" + views.replace(" views", "lang_views_suffix")
 
     let thumbUrl = yt2009utils.getThumbUrl(section_content.id, req)
@@ -132,33 +130,130 @@ module.exports = function(req, res) {
     code = require("./yt2009loginsimulate")(req, code, true)
 
     // module-based stuff
-    let moduleHTML = ``
-    let modules = "rec,watched,featured,pop,inbox"
-    if((req.headers.cookie || "").includes("homepage_picked=")) {
-        modules = req.headers.cookie.split("homepage_picked=")[1].split(";")[0]
-    }
-    modules.split(",").forEach(m => {
-        switch(m) {
-            case "rec": {
-                moduleHTML += templates.homepage_recommended
+let modules = "rec,watched,featured,pop,inbox"
+if((req.headers.cookie || "").includes("homepage_picked=")) {
+    modules = req.headers.cookie.split("homepage_picked=")[1].split(";")[0]
+}
+
+let moduleHTMLs = {
+    rec: "",
+    featured: "",
+    videos: "",
+    pop: "",
+    watched: "",
+    rec: "",
+    inbox: "",
+    activity: "",
+    nearyou: "",
+    latest: "",
+    insmap: "",
+    inschrt: ""
+}
+        
+modules.split(",").forEach(m => {
+    switch(m) {
+        case "rec": {
+                moduleHTMLs.rec += templates.homepage_recommended
                 if((req.headers.cookie || "").includes("login_simulate")) {
-                    moduleHTML = moduleHTML.replace(
+                    moduleHTMLs.rec = moduleHTMLs.rec.replace(
                         "iyt-edit-link iyt-edit-link-gray",
                         "iyt-edit-link"
                     )
                 }
                 break;
             }
-            case "watched": {
-                // videos watched now
-                let watchedNow = yt2009html.featured().slice(0, 4)
-                if(watchedNow.length < 4) return;
-                moduleHTML += templates.homepage_watched
+        case "featured": {
+            // featured
+            let featuredHTML = templates.homepage_featured
+            let featured_videos = []
+            while(featured_videos.length !== 4) {
+                let video = videos.homepageCache_featured[
+                    Math.floor(Math.random() * videos.homepageCache_featured.length)
+                ]
+                if(!featured_videos.includes(video)) {
+                    featured_videos.push(video)
+                }
+            }
+
+            let featuredIndex = 0;
+            featured_videos.forEach(video => {
+                featuredHTML = section_fill(
+                    featuredHTML,
+                    `featured${featuredIndex}`,
+                    video,
+                    flags,
+                    req
+                )
+                featuredIndex++;
+            })
+            moduleHTMLs.featured = featuredHTML;
+            break;
+        }
+        case "videos": {
+        // video cells
+        let videosHTML = ``
+        function addVideo(video) {
+            if(!video.id) return;
+            let views = video.views;
+            if(flags.includes("realistic_view_count")
+            && parseInt(views.replace(/[^0-9]/g, "")) >= 100000) {
+                views = utils.countBreakup(
+                    Math.floor(parseInt(views.replace(/[^0-9]/g, "")) / 90)
+                ) + " views"
+            }
+
+            let videoTitle = video.title;
+            let authorName = video.uploaderName;
+
+            let waybackData = {}
+            if(wayback_watchpage.readCacheOnly(video.id)) {
+                waybackData = wayback_watchpage.readCacheOnly(video.id)
+            }
+            if(waybackData.title) {
+                videoTitle = waybackData.title
+            }
+            if(waybackData.authorName
+            && !waybackData.authorName.toLowerCase().includes("subscribe")) {
+                authorName = waybackData.authorName
+            }
+
+            videosHTML += templates.videoCell(
+                video.id,
+                videoTitle.trim(),
+                req.protocol,
+                authorName.trim(),
+                video.uploaderUrl,
+                views,
+                flags,
+                true
+            )
+        }
+        }
+        case "pop": {
+            //most popular by category
+            let popHTML = templates.homepage_mostpopular
+            for(let section in sections) {
+               let vid = sections[section][
+                    Math.floor(Math.random() * sections[section].length)
+                ]
+                popHTML = section_fill(
+                   popHTML, section, vid, flags, req
+                )
+            }
+            moduleHTMLs.pop = popHTML;
+            break;
+        }
+        
+        case "watched": {
+            // videos watched now
+            let watchedNow = yt2009html.featured().slice(0, 4)
+            if(watchedNow.length >= 4) {
+                let watchedHTML = templates.homepage_watched
             
                 let watchedNowIndex = 0;
                 watchedNow.forEach(watched => {
-                    moduleHTML = section_fill(
-                        moduleHTML,
+                    watchedHTML = section_fill(
+                        watchedHTML,
                         `watchednow${watchedNowIndex}`,
                         watched,
                         flags,
@@ -166,60 +261,33 @@ module.exports = function(req, res) {
                     )
                     watchedNowIndex++;
                 })
-                break;
+                moduleHTMLs.watched = watchedHTML;
             }
-            case "featured": {
-                // featured
-                moduleHTML += templates.homepage_featured
-                let featured_videos = []
-                while(featured_videos.length !== 4) {
-                    let video = videos.homepageCache_featured[
-                        Math.floor(Math.random() * videos.homepageCache_featured.length)
-                    ]
-                    if(!featured_videos.includes(video)) {
-                        featured_videos.push(video)
-                    }
-                }
-
-                let featuredIndex = 0;
-                featured_videos.forEach(video => {
-                    moduleHTML = section_fill(
-                        moduleHTML,
-                        `featured${featuredIndex}`,
-                        video,
-                        flags,
-                        req
-                    )
-                    featuredIndex++;
-                })
-                break;
-            }
-            case "pop": {
-                // most popular by category
-                moduleHTML += templates.homepage_mostpopular
-                for(let section in sections) {
-                    let vid = sections[section][
-                        Math.floor(Math.random() * sections[section].length)
-                    ]
-                    moduleHTML = section_fill(
-                        moduleHTML, section, vid, flags, req
-                    )
-                }
-                break;
-            }
-            case "inbox": {
-                // show inbox
-                code = code.replace(
-                    `<!--yt2009_inbox-->`,
-                    templates.homepage_inbox
+            break;
+        }
+        
+        case "rec": {
+            let recHTML = templates.homepage_recommended
+            if((req.headers.cookie || "").includes("login_simulate")) {
+                recHTML = recHTML.replace(
+                    "iyt-edit-link iyt-edit-link-gray",
+                    "iyt-edit-link"
                 )
-                break;
             }
-            case "activity": {
-                // friendtivity
-                let cellsHTML = ""
-                let comments = yt2009utils.latestCustomComments(3)
-                if(comments.length == 0) return;
+            moduleHTMLs.rec = recHTML;
+            break;
+        }
+        
+        case "inbox": {
+            moduleHTMLs.inbox = templates.homepage_inbox;
+            break;
+        }
+        
+        case "activity": {
+            // friendtivity
+            let cellsHTML = ""
+            let comments = yt2009utils.latestCustomComments(3)
+            if(comments.length > 0) {
                 comments.forEach(cmt => {
                     let video = yt2009html.get_cache_video(cmt.video)
                     if(!video || !video.title) return;
@@ -230,32 +298,45 @@ module.exports = function(req, res) {
                 let fullModule = templates.homepage_friendtivity.replace(
                     "fri-data_fill", cellsHTML
                 )
-                moduleHTML += fullModule
-                break;
+                moduleHTMLs.activity = fullModule;
             }
-            case "nearyou": {
-                moduleHTML += templates.homepage_nearyou
-                break;
-            }
-            case "latest": {
-                moduleHTML += templates.homepage_subs
-                break;
-            }
-            case "insmap": {
-                moduleHTML += templates.insightMap
-                return;
-            }
-            case "inschrt": {
-                moduleHTML += templates.insightChart
-                return;
-            }
+            break;
         }
-    })
+        
+        case "nearyou": {
+            moduleHTMLs.nearyou = templates.homepage_nearyou
+            break;
+        }
+        
+        case "latest": {
+            moduleHTMLs.latest = templates.homepage_subs
+            break;
+        }
+        
+        case "insmap": {
+            moduleHTMLs.insmap = templates.insightMap
+            break;
+        }
+        
+        case "inschrt": {
+            moduleHTMLs.inschrt = templates.insightChart
+            break;
+        }
+    }
+})
 
-    code = code.replace(
-        `<!--yt2009_modules-->`,
-        moduleHTML
-    )
+code = code.replace(`<!--yt2009_featured-->`, moduleHTMLs.featured)
+code = code.replace(`<!--yt2009_pop-->`, moduleHTMLs.pop)
+code = code.replace(`<!--yt2009_watched-->`, moduleHTMLs.watched)
+code = code.replace(`<!--yt2009_rec-->`, moduleHTMLs.rec)
+code = code.replace(`<!--yt2009_inbox-->`, moduleHTMLs.inbox)
+code = code.replace(`<!--yt2009_activity-->`, moduleHTMLs.activity)
+code = code.replace(`<!--yt2009_nearyou-->`, moduleHTMLs.nearyou)
+code = code.replace(`<!--yt2009_latest-->`, moduleHTMLs.latest)
+code = code.replace(`<!--yt2009_insmap-->`, moduleHTMLs.insmap)
+code = code.replace(`<!--yt2009_inschrt-->`, moduleHTMLs.inschrt)
+code = code.replace(`<!--yt2009_vids-->`, moduleHTMLs.videos)
+
 
     if((req.headers.cookie || "").includes("login_simulate")) {
         code = code.replace(
@@ -317,7 +398,6 @@ module.exports = function(req, res) {
     if(customHomepageText) {
         addNotice = true;
         noticeText = require("./config.json").customHomepageText
-                   || customHomepageText
     }
 
     let ytsessions = {
