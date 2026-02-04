@@ -1,0 +1,459 @@
+
+#footer ul {
+    text-shadow: none;
+}
+
+#masthead-user-expander .yt-uix-expander-head,
+#masthead-gaia-user-wrapper,
+#masthead-gaia-photo-wrapper {
+    border: 1px solid transparent;
+}
+
+#watch-description .expand, #watch-description .collapse {
+    filter: invert();
+}
+
+.yt-uix-button-default, .yt-subscription-button-js-default,
+.yt-uix-button-panel:hover .yt-uix-button-text,
+body .yt-uix-button-default[disabled] {
+    box-shadow: none !important;
+    text-shadow: 0 1px 0 #000;
+    border-color: #262626;
+    background-image: linear-gradient(to bottom,#000 0,#202020 100%) !important;
+}
+
+.subscription-button-with-recommended-channels .yt-uix-button-content {
+    color: #555 !important;
+}
+
+.metadata-inline .yt-uix-button-content {
+    color: var(--black-color) !important;
+}
+
+.yt-horizontal-rule {
+    border-top-color: var(--black-color) !important;
+    border-bottom-color: var(--nero-color-primary) !important;
+}
+
+/* Strzałki i proste elementy UI */
+.yt-uix-button-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid currentColor;
+    vertical-align: middle;
+}
+
+.masthead-expander-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid currentColor;
+}
+
+.see-more-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 4px solid currentColor;
+    margin-left: 4px;
+}
+
+.arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid currentColor;
+    margin-left: 4px;
+}
+
+.yt-uix-slider-prev-arrow,
+.yt-uix-slider-next-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+.yt-uix-slider-prev-arrow {
+    border-right: 6px solid currentColor;
+}
+
+.yt-uix-slider-next-arrow {
+    border-left: 6px solid currentColor;
+}
+
+.panel-tab-indicator-arrow {
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid currentColor;
+    margin: 0 auto;
+}
+
+/* Proste ikony CSS */
+.yt-uix-button-icon-wrapper img,
+.yt-uix-button-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    border-radius: 2px;
+}
+
+.close-button {
+    display: block;
+    width: 16px;
+    height: 16px;
+    position: relative;
+}
+
+.close-button::before,
+.close-button::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    top: 50%;
+    left: 0;
+}
+
+.close-button::before {
+    transform: rotate(45deg);
+}
+
+.close-button::after {
+    transform: rotate(-45deg);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: currentColor;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.yt-spinner-img {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: currentColor;
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* Proste checkbox */
+input[type="checkbox"].ios-switch + div {
+    display: inline-block;
+    vertical-align: middle;
+    width: 3em;
+    height: 1em;
+    border: rgba(0, 0, 0, 0.3) solid 1px;
+    border-radius: 999px;
+    margin: 0 0.5em;
+    background: white;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), transparent), linear-gradient(90deg, hsl(210, 90%, 60%) 50%, transparent 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    background-origin: border-box;
+    background-clip: border-box;
+    overflow: hidden;
+    transition-duration: 0.4s;
+    transition-property: padding, width, background-position, text-indent;
+    box-shadow: 0 0.1em 0.1em rgba(0, 0, 0, 0.2) inset, 0 0.45em 0 0.1em rgba(0, 0, 0, 0.05) inset;
+    font-size: 150%;
+}
+
+input[type="checkbox"].ios-switch:checked + div {
+    padding-left: 2em;
+    width: 1em;
+    background-position: 0 0;
+}
+
+input[type="checkbox"].ios-switch + div:before {
+    content: '';
+    float: left;
+    width: 1.65em;
+    height: 1.65em;
+    margin: -0.1em;
+    border: rgba(0, 0, 0, 0.35) solid 1px;
+    border-radius: inherit;
+    background: white;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), transparent);
+    box-shadow: 0 0.1em 0.1em 0.1em hsla(0, 0%, 100%, 0.8) inset, 0 0 0.5em rgba(0, 0, 0, 0.3);
+    color: white;
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Podstawowe kształty */
+.video-time {
+    display: inline-block;
+    padding: 2px 4px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.yt-rounded {
+    border-radius: 2px;
+}
+
+.yt-uix-tile {
+    position: relative;
+    display: block;
+}
+
+.yt-grid-box {
+    box-sizing: border-box;
+}
+
+.hid {
+    display: none !important;
+}
+
+.clear {
+    clear: both;
+}
+
+.cb {
+    clear: both;
+}
+
+.floatL {
+    float: left;
+}
+
+.alignC {
+    text-align: center;
+}
+
+.alignTop {
+    vertical-align: top;
+}
+
+/* Podstawowe layouty */
+.ytg-base {
+    position: relative;
+}
+
+.ytg-wide {
+    width: 970px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ytg-box {
+    box-sizing: border-box;
+}
+
+.ytg-2col, .ytg-3col, .ytg-4col {
+    float: left;
+}
+
+.ytg-2col {
+    width: 33.33%;
+}
+
+.ytg-3col {
+    width: 50%;
+}
+
+.ytg-4col {
+    width: 66.66%;
+}
+
+.ytg-last {
+    float: right;
+}
+
+.ytg-fl {
+    float: left;
+}
+
+/* Scrollbox */
+.scrollable {
+    overflow: auto;
+}
+
+.scrollbox-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.scrollbox-content {
+    position: relative;
+}
+
+.scrollbox-body {
+    overflow: hidden;
+}
+
+.outer-scrollbox, .inner-scrollbox {
+    position: relative;
+}
+
+/* Expander */
+.yt-uix-expander {
+    position: relative;
+}
+
+.yt-uix-expander-head {
+    cursor: pointer;
+}
+
+.yt-uix-expander-collapsed .yt-uix-expander-body {
+    display: none;
+}
+
+/* Tooltip */
+.yt-uix-tooltip {
+    position: relative;
+}
+
+.yt-uix-tooltip:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+/* Pager */
+.yt-uix-pager {
+    display: inline-block;
+}
+
+.yt-uix-pager-button {
+    display: inline-block;
+    margin: 0 2px;
+}
+
+/* Button groups */
+.yt-uix-button-group {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.yt-uix-button-group .start {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.yt-uix-button-group .end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+}
+
+.yt-uix-button-group .yt-uix-button {
+    position: relative;
+}
+
+/* Form elements */
+.yt-uix-form-input-text {
+    box-sizing: border-box;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    background-color: white;
+}
+
+.yt-uix-form-textarea {
+    box-sizing: border-box;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    background-color: white;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.yt-uix-form-input-fluid {
+    width: 100%;
+}
+
+/* Grid system */
+.yt-grid-fluid {
+    width: 100%;
+}
+
+.yt-grid-4 {
+    width: 25%;
+    float: left;
+}
+
+.last {
+    float: right;
+}
+
+/* Slider */
+.yt-uix-slider {
+    position: relative;
+    overflow: hidden;
+}
+
+.yt-uix-slider-fluid {
+    width: 100%;
+}
+
+.yt-uix-slider-slide {
+    position: relative;
+    transition: left 0.3s ease;
+}
+
+.yt-uix-slider-slide-unit {
+    float: left;
+}
+
+.yt-uix-slider-body {
+    position: relative;
+    overflow: hidden;
+}
+
+.yt-uix-slider-shade-left,
+.yt-uix-slider-shade-right {
+    position: absolute;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    pointer-events: none;
+}
+
+.yt-uix-slider-shade-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.3), transparent);
+}
+
+.yt-uix-slider-shade-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(0,0,0,0.3), transparent);
+}
